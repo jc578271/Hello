@@ -10,44 +10,48 @@ const width = Dimensions.get('window').width
 //     description: any
 // }
 
+const labelIcons = {
+    'Contact': [IC_LIST, 'Danh Bạ'],
+    'History': [IC_HISTORY, 'Gần Đây']
+}
+
 const Footer = ({ state, descriptors, navigation }: any) => {
- 
-
-    const itemRender = () => {
-        state.rouets.map((route, index) => {
-            console.log(descriptors[route.key])
-            return <Text></Text>
-        })
-        
+    const itemRender = (title: string, index: number) => {
+        const isFocused = state.index == index
+        return (
+        <WrapItem>
+            <ItemBtn
+            onPress={() => navigation.navigate(title)}>
+                <ItemImg 
+                    resizeMode="cover" source={labelIcons[title][0]}
+                    style={{tintColor: isFocused ? 'white' : '#DADADA'}}
+                />
+                <ItemText style={{color: isFocused ? 'white' : '#DADADA'}}>
+                    {labelIcons[title][1]}
+                </ItemText>
+            </ItemBtn>
+        </WrapItem>
+    )}
+    const contactRoute = state.routes[1]
+    const historyRoute = state.routes[2]
+    
+    if (state.index > 0) {
+        return (
+            <Container>
+                <WrapBtn>
+                    <NavBg source={IMG_NAVBG} />
+                    <AddBtn>
+                        <AddImg resizeMode="contain" source={IC_ADDBTN} />
+                    </AddBtn>
+                </WrapBtn>
+                {itemRender(descriptors[contactRoute.key].route.name, 1)}
+                <Sth></Sth>
+                {itemRender(descriptors[historyRoute.key].route.name, 2)}
+            </Container>
+        )
+    } else {
+        return null
     }
-
-
-    return (
-        <Container>
-            {state.routes.map((route, index) => {
-                console.log(descriptors[route.key].route)
-                return <Text></Text>
-            })}
-            {/* <WrapBtn>
-                <NavBg source={IMG_NAVBG} />
-                <AddBtn>
-                    <AddImg resizeMode="contain" source={IC_ADDBTN} />
-                </AddBtn>
-            </WrapBtn>
-            
-            <Sth></Sth>
-            <WrapItem>
-                <ItemBtn
-                onPress={() => navigateHandler('History')}>
-                    <HistoryImg 
-                        resizeMode="cover" source={IC_HISTORY}
-                        style={{tintColor: title == 'History' ? 'white' : '#DADADA'}}
-                    />
-                    <HistoryText style={{color: title == 'History' ? 'white' : '#DADADA'}}>Gần Đây</HistoryText>
-                </ItemBtn>
-            </WrapItem> */}
-        </Container>
-    )
 }
 
 export default memo(Footer)
@@ -96,17 +100,15 @@ const NavBg = styled.Image`
     position: absolute;
     bottom: 0
 `
-const ListImg = styled.Image`
+const ItemImg = styled.Image`
     width: 30px
     height: 30px
     margin: auto
 `
-const ListText = styled.Text`
-    font-weigth: 400px
+const ItemText = styled.Text`
+    font-weight: 400
     font-size: 10px
     line-height: 12px
     text-align: center
     margin-top: 4px
 `
-const HistoryImg = styled(ListImg)``
-const HistoryText = styled(ListText)``

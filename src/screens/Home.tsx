@@ -1,6 +1,43 @@
 import React, {memo} from "react";
+import { Dimensions } from "react-native";
 import styled from "styled-components/native"
 import { IC_LOGO, IMG_HOMEBG, IC_SMALLLOGO } from "../assets";
+
+interface Props {
+    navigation: any
+}
+const screenHeigth = Dimensions.get("window").height
+
+const Home = ({ navigation }: Props) => {
+    return (
+        <Container>
+            <Section1>
+                <HomeBg source={IMG_HOMEBG} />
+                <LogoAppIcon source={IC_LOGO}/>
+            </Section1>
+            <Section2>
+                <Title>Base wework</Title>
+                <SubTitle>
+                    {`Giải pháp quản lý công việc\n& dự án toàn diện cho doanh nghiệp 4.0`}
+                </SubTitle>
+                <SmallLogoSection>
+                    <SmallLogoIcon source={IC_SMALLLOGO} />
+                </SmallLogoSection>
+            </Section2>
+            <Section3>
+                <NonAuthText>Bạn chưa đăng nhập</NonAuthText>
+                <LoginBtn onPress={() => navigation.navigate('Contact')}>
+                    <LoginText>Đăng nhập bằng base account</LoginText>
+                </LoginBtn>
+                <ManualLoginBtn>
+                    <ManualLoginText>Đăng nhập thủ công</ManualLoginText>
+                </ManualLoginBtn>
+            </Section3>
+        </Container>
+    )
+}
+
+export default memo(Home)
 
 const Container = styled.View`
     background-color: #FFFFFF
@@ -27,6 +64,7 @@ const HomeBg = styled.Image`
     z-index: -1;
 `
 const Section2 = styled.View`
+    display: flex
     align-items: center;
     flex: 1;
     
@@ -52,8 +90,12 @@ const SubTitle = styled.Text`
 
     color: #333333;
 `
+const SmallLogoSection = styled.View`
+    flex: auto
+    
+`
 const SmallLogoIcon = styled.Image`
-    margin-top: 60px;
+    margin: auto
 `
 const Section3 = styled.View`
     margin: 0 20px 30px 20px
@@ -98,36 +140,3 @@ const ManualLoginBtn = styled(LoginBtn)`
 const ManualLoginText = styled(LoginText)`
     color: #F2A54A;
 `
-
-interface Props {
-    navigation: any
-}
-
-const Home = ({ navigation }: Props) => {
-    return (
-        <Container>
-            <Section1>
-                <HomeBg source={IMG_HOMEBG} />
-                <LogoAppIcon source={IC_LOGO}/>
-            </Section1>
-            <Section2>
-                <Title>Base wework</Title>
-                <SubTitle>
-                    {`Giải pháp quản lý công việc\n& dự án toàn diện cho doanh nghiệp 4.0`}
-                </SubTitle>
-                <SmallLogoIcon source={IC_SMALLLOGO} />
-            </Section2>
-            <Section3>
-                <NonAuthText>Bạn chưa đăng nhập</NonAuthText>
-                <LoginBtn onPress={() => navigation.navigate('Contact')}>
-                    <LoginText>Đăng nhập bằng base account</LoginText>
-                </LoginBtn>
-                <ManualLoginBtn>
-                    <ManualLoginText>Đăng nhập thủ công</ManualLoginText>
-                </ManualLoginBtn>
-            </Section3>
-        </Container>
-    )
-}
-
-export default memo(Home)

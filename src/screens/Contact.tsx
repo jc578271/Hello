@@ -5,8 +5,98 @@ import { IC_SEARCH, IMG_PROFILE } from '../assets'
 import dummydb from '../assets/dummydb/db'
 import { groupedData, filterData } from "../utils/helper";
 
+const Contact = (props:any) => {
+    const chars = ['Digit',
+        'A','B','C','D','E','F','G','H','I','J','K','L','M',
+        'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    const [db, setDb] = useState<any[]>([])
+    const [isMounted, setMounted] = useState(false)
+    const [searchInput, setSearchInput] = useState('')
+    const [posYs, setPosYs] = useState<any>({"Digit": 0})
+    const [scrollRef, setScrollRef] = useState<ScrollView|null>(null)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+        
+    useEffect(() => {
+        setDb(filterData(searchInput, dummydb))
+    }, [isMounted, searchInput])
+    
+
+    const onChangePosYs = (e: LayoutChangeEvent, char: string) => {
+        let newPosYs = posYs
+        newPosYs[char] = e.nativeEvent.layout.y
+        setPosYs(newPosYs)
+    }
+
+    const groupByCharRender = (char:string, db: any[]) => (
+        <View>
+            <CharSection>
+                <BgCharSection></BgCharSection>
+                <Chartext>{char}</Chartext>
+            </CharSection>
+            <ItemsSection>
+                {groupedData(char, db).map(({ name, number }, key) => {
+                    return <View key={key}>{itemRender(name, number, key)}</View>
+                })}
+            </ItemsSection>
+        </View>
+    )
+
+    const itemRender = (name: string, number: string, key: number) => (
+        <Item key={key}>
+            <ProfileImg source={IMG_PROFILE} />
+            <InfoSection style={{borderTopWidth: key==0?0:0.5}}>
+                <ProfileName>{name}</ProfileName>
+                <ProfileNumber>{number}</ProfileNumber>
+            </InfoSection>
+        </Item>
+    )
+
+    return (
+        <Container>
+            <SearchSection>
+                <SearchIcon source={IC_SEARCH} />
+                <SearchInput 
+                    placeholder="Tìm kiếm danh bạ"
+                    onChangeText={(text) => {
+                        setSearchInput(text)
+                    }}
+                />
+            </SearchSection>
+            <ScrollContent ref={view => setScrollRef(view)}>
+                {chars.map((char, key) => {
+                    return groupedData(char, db).length >0
+                    ? <View onLayout={e => onChangePosYs(e, char)} key={key}>
+                        {groupByCharRender(char, db)}
+                    </View>
+                    : null
+                })}
+                <Sth></Sth>
+            </ScrollContent>
+            <SideCharSection>
+                {chars.map((char, key) => (
+                    <SideCharBtn 
+                        key={key}
+                        onPress={() => {
+                            if(posYs[char] != undefined) {
+                                scrollRef?.scrollTo({y: posYs[char]})
+                            }
+                        }}>
+                        <SideCharText >{char}</SideCharText>
+                    </SideCharBtn>
+                ))}
+            </SideCharSection>
+        </Container>
+    )
+}
+
+export default memo(Contact)
+
 const Container =  styled.View`
         display: flex
+        background-color: #FFFFFF
     `
 const SearchSection = styled.View`
     display: flex
@@ -16,7 +106,7 @@ const SearchSection = styled.View`
     opacity: 0.5
     border-radius: 6px
     overflow: hidden
-    margin: 10px 16px
+    margin: 0 16px 10px 16px
     
 `
 const SearchIcon = styled.Image`
@@ -51,9 +141,8 @@ const BgCharSection = styled.View`
 const Chartext = styled.Text`
     color: #333333;
     font-weight: 500;
-    fonr-size: 15px;
-    lineheight: 16px;
-    
+    font-size: 15px;
+    line-height: 16px;
 `
 const ItemsSection = styled.View`
     
@@ -65,7 +154,7 @@ const Item = styled.View`
     align-items: center
 `
 const ProfileImg = styled.Image`
-    margin-top: 20px
+    margin-top: 14px
     height: 40px;
     width: 40px;
     border-radius: 100px;
@@ -73,7 +162,6 @@ const ProfileImg = styled.Image`
 const InfoSection = styled.View`
     margin: 0 16px
     padding-top: 15px
-    border-top-width: 0.5px;
     border-color: #BDBDBD;
     flex: auto
 `
@@ -96,7 +184,7 @@ const Sth = styled.View`
 const SideCharSection = styled.View`
     position: absolute
     right: 10px
-    top: 40px
+    top: 10px
     display: flex
 `
 const SideCharBtn = styled.TouchableOpacity`
@@ -111,94 +199,3 @@ const SideCharText = styled.Text`
     letter-spacing: 0.12px;
     color: #F2A54A;
 `
-
-const Contact = (props:any) => {
-    const chars = ['Digit',
-        'A','B','C','D','E','F','G','H','I','J','K','L','M',
-        'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    const [db, setDb] = useState<any[]>([])
-    const [isMounted, setMounted] = useState(false)
-    const [searchInput, setSearchInput] = useState('')
-    const [posYs, setPosYs] = useState<any>({"Digit": 0})
-    const [currentChar, setCurrentChar] = useState('Digit')
-    const [scrollRef, setScrollRef] = useState<ScrollView|null>(null)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-        
-    useEffect(() => {
-        setDb(filterData(searchInput, dummydb))
-        if(posYs[currentChar] != undefined) {
-            scrollRef?.scrollTo({y: posYs[currentChar]})
-        }
-    }, [isMounted, searchInput, currentChar])
-    
-
-    const onChangePosYs = (e: LayoutChangeEvent, char: string) => {
-        let newPosYs = posYs
-        newPosYs[char] = e.nativeEvent.layout.y
-        setPosYs(newPosYs)
-    }
-
-    const groupByCharRender = (char:string, db: any[]) => (
-        <View>
-            <CharSection>
-                <BgCharSection></BgCharSection>
-                <Chartext>{char}</Chartext>
-            </CharSection>
-            <ItemsSection>
-                {groupedData(char, db).map(({ name, number }, key) => {
-                    return <View key={key}>{itemRender(name, number)}</View>
-                })}
-            </ItemsSection>
-        </View>
-    )
-
-    const itemRender = (name: string, number: string) => (
-        <Item>
-            <ProfileImg source={IMG_PROFILE} />
-            <InfoSection>
-                <ProfileName>{name}</ProfileName>
-                <ProfileNumber>{number}</ProfileNumber>
-            </InfoSection>
-        </Item>
-    )
-
-    return (
-        <Container>
-            <SearchSection>
-                <SearchIcon source={IC_SEARCH} />
-                <SearchInput 
-                    placeholder="Tìm kiếm danh bạ"
-                    onChangeText={(text) => {
-                        setSearchInput(text)
-                    }}
-                />
-            </SearchSection>
-            <ScrollContent ref={view => setScrollRef(view)}>
-                {chars.map((char, key) => {
-                    return groupedData(char, db).length >0
-                    ? <View onLayout={e => onChangePosYs(e, char)} key={key}>
-                        {groupByCharRender(char, db)}
-                    </View>
-                    : null
-                })}
-                <Sth></Sth>
-            </ScrollContent>
-            <SideCharSection>
-                {chars.map((char, key) => (
-                    <SideCharBtn 
-                        key={key}
-                        onPress={() => {
-                            setCurrentChar(char)
-                        }}>
-                        <SideCharText >{char}</SideCharText>
-                    </SideCharBtn>
-                ))}
-            </SideCharSection>
-        </Container>
-    )
-}
-
-export default memo(Contact)

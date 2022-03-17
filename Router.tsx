@@ -1,39 +1,36 @@
-import React from "react";
+import React, { memo } from "react";
 import Home from "./src/screens/Home";
 import Contact from "./src/screens/Contact";
-// import Layout from "./src/components/Layout";
 import { NavigationContainer } from "@react-navigation/native"
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-// import {  createDrawerNavigator} from '@react-navigation/drawer'
+// import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import History from "./src/screens/History";
-import { View } from "react-native";
-// import Footer from "./src/components/Footer";
-const Stack = createNativeStackNavigator()
-// const Tab = createBottomTabNavigator()
+import Footer from "./src/components/Footer";
+import Header from "./src/components/Header"
+import { SafeAreaProvider } from "react-native-safe-area-context";
+// const Stack = createNativeStackNavigator()
+const Tab = createBottomTabNavigator()
 // const Drawer = createDrawerNavigator()
 
 const Router = () => {
-    
-
     return (
-        <View>
+        <SafeAreaProvider>
             <NavigationContainer>
-                <Stack.Navigator 
+                <Tab.Navigator
                     initialRouteName="Home"
-                    // tabBar={props=><Footer {...props} />}
-                    
+                    tabBar={props=><Footer {...props} />}
+                    screenOptions={{
+                        header: props=><Header {...props} />
+                    }}
                 >
-                    <Stack.Screen name="Home" component={Home} />
-                    <Stack.Screen name="Contact" component={Contact}/>
-                    <Stack.Screen name="History" component={History}/>
+                    <Tab.Screen options={{headerShown: false}} name="Home" component={Home}/>
+                    <Tab.Screen name="Contact" component={Contact}/>
+                    <Tab.Screen name="History" component={History}/>
                     
-                </Stack.Navigator>
+                </Tab.Navigator>
             </NavigationContainer>
-        </View>
-        
-        
+        </SafeAreaProvider>
     )
 }
 
-export default Router
+export default memo(Router)

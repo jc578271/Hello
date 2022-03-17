@@ -2,11 +2,30 @@ import React, { memo } from "react";
 import styled from "styled-components/native";
 import { IC_MENU, IC_CAM } from "../assets";
 
+
+const Header = ({ route }: any) => {
+    return (
+        <Container>
+            <MenuBtn>
+                <MenuImg source={IC_MENU} />
+            </MenuBtn>
+            <Section1>
+                <Title>{route.name}</Title>
+            </Section1>
+            <CamBtn>
+                <CamImg source={IC_CAM} />
+            </CamBtn>
+        </Container>
+    )
+}
+
+export default memo(Header)
+
 const Container = styled.View`
     background-color: #FFFFFF
     display: flex
     flex-direction: row
-    margin: 16px
+    padding: 10px 16px
     justify-content: center
     align-items: center
 `
@@ -37,25 +56,3 @@ const CamBtn = styled(MenuBtn)`
 const CamImg = styled(MenuImg)`
 
 `
-
-interface Props {
-    title: string
-}
-
-const Header = ({ title }: Props) => {
-    return (
-        <Container>
-            <MenuBtn>
-                <MenuImg source={IC_MENU} />
-            </MenuBtn>
-            <Section1>
-                <Title>{title}</Title>
-            </Section1>
-            <CamBtn>
-                <CamImg source={IC_CAM} />
-            </CamBtn>
-        </Container>
-    )
-}
-
-export default memo(Header)
