@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, Easing, View } from "react-native";
+import { Animated, Dimensions, Easing, Platform, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IMG_PROFILE } from "../assets";
@@ -14,16 +14,21 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
     useEffect(() => {
         let initVal = isExpanded ? listHeight : 0
         let finalVal = isExpanded ? 0 : listHeight
-        animation.setValue({x: 0, y:initVal})
-        Animated.spring(animation, { 
-            toValue: {x:0, y: finalVal}
+        animation.setValue({x: 0, y:-initVal})
+        Animated.spring(animation, {
+            toValue: {x:0, y: -finalVal},
+            useNativeDriver:false
         }).start()
     }, [isExpanded])
 
 
     return (
         <>
-        <View style={{backgroundColor: "#F2A54A", height: insets.top, width: '100%'}}></View>
+        <View style={{
+            backgroundColor: "#F2A54A",
+            height:  Platform.OS == "ios" ? insets.top: StatusBar.currentHeight
+            }}>
+        </View>
         <Container>
             <ProflileSection>
                 <ProfileImg source={IMG_PROFILE} />
@@ -195,7 +200,7 @@ const DropEditText = styled.Text`
 const ListSection = styled.ScrollView`
     display: flex
 `
-const ItemSection = styled.View`
+const ItemSection = styled.TouchableOpacity`
     display: flex
     flex-direction: row
     align-items: center
@@ -210,6 +215,7 @@ const ItemText = styled.Text`
     font-weight: 400;
     font-size: 15px;
     line-height: 16px;
+    height: 16px
     /* identical to box height, or 107% */
 
     letter-spacing: 0.12px;

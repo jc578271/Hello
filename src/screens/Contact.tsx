@@ -179,7 +179,7 @@ const ProfileNumber = styled.Text`
     color: #828282
 `
 const Sth = styled.View`
-    height: 100px
+    height: 110px
 `
 const SideCharSection = styled.View`
     position: absolute
