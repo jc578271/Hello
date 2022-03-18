@@ -1,12 +1,19 @@
 import React, { memo } from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_MENU, IC_CAM } from "../assets";
 
 
-const Header = ({ route }: any) => {
+const Header = ({ route, navigation }: any) => {
+    const insets = useSafeAreaInsets()
     return (
+        <>
+        <View style={{backgroundColor: "#FFFFFF", height: insets.top, width: '100%'}}></View>
         <Container>
-            <MenuBtn>
+            <MenuBtn
+                onPress={() => navigation.openDrawer()}
+            >
                 <MenuImg source={IC_MENU} />
             </MenuBtn>
             <Section1>
@@ -16,6 +23,7 @@ const Header = ({ route }: any) => {
                 <CamImg source={IC_CAM} />
             </CamBtn>
         </Container>
+        </>
     )
 }
 

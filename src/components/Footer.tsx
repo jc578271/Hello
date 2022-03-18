@@ -1,21 +1,20 @@
 import React, { memo } from "react";
 import { Dimensions, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_ADDBTN, IMG_NAVBG, IC_LIST, IC_HISTORY } from "../assets";
 
 const width = Dimensions.get('window').width
-
-// interface Props {
-//     state: string,
-//     description: any
-// }
 
 const labelIcons = {
     'Contact': [IC_LIST, 'Danh Bạ'],
     'History': [IC_HISTORY, 'Gần Đây']
 }
 
+
 const Footer = ({ state, descriptors, navigation }: any) => {
+    const insets = useSafeAreaInsets()
+
     const itemRender = (title: string, index: number) => {
         const isFocused = state.index == index
         return (
@@ -32,11 +31,12 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             </ItemBtn>
         </WrapItem>
     )}
-    const contactRoute = state.routes[1]
-    const historyRoute = state.routes[2]
+    const contactRoute = state.routes[0]
+    const historyRoute = state.routes[1]
     
-    if (state.index > 0) {
+    
         return (
+            <>
             <Container>
                 <WrapBtn>
                     <NavBg source={IMG_NAVBG} />
@@ -44,14 +44,14 @@ const Footer = ({ state, descriptors, navigation }: any) => {
                         <AddImg resizeMode="contain" source={IC_ADDBTN} />
                     </AddBtn>
                 </WrapBtn>
-                {itemRender(descriptors[contactRoute.key].route.name, 1)}
+                {itemRender(descriptors[contactRoute.key].route.name, 0)}
                 <Sth></Sth>
-                {itemRender(descriptors[historyRoute.key].route.name, 2)}
+                {itemRender(descriptors[historyRoute.key].route.name, 1)}
             </Container>
+            <View style={{backgroundColor: '#F2A54A', height: insets.bottom}}></View>
+            </>
         )
-    } else {
-        return null
-    }
+    
 }
 
 export default memo(Footer)
@@ -60,11 +60,12 @@ const Container = styled.View`
     display: flex;
     flex-direction: row
     align-items: flex-end
+    height: 0
 `
 const WrapItem = styled.View`
     flex: 1
     align-items: center
-    justify-content: center
+    justify-content: flex-end
     justify-self: end
     height: 55px
 `
@@ -78,7 +79,7 @@ const WrapBtn = styled.View`
     position: absolute
     left:0
     right: 0
-    top: -45px
+    top: -100px
     bottom: 0
     display: flex
 `

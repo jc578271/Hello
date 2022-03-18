@@ -26,7 +26,7 @@ const Home = ({ navigation }: Props) => {
             </Section2>
             <Section3>
                 <NonAuthText>Bạn chưa đăng nhập</NonAuthText>
-                <LoginBtn onPress={() => navigation.navigate('Contact')}>
+                <LoginBtn onPress={() => navigation.navigate('DrawStack')}>
                     <LoginText>Đăng nhập bằng base account</LoginText>
                 </LoginBtn>
                 <ManualLoginBtn>

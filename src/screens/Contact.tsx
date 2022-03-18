@@ -95,9 +95,9 @@ const Contact = (props:any) => {
 export default memo(Contact)
 
 const Container =  styled.View`
-        display: flex
-        background-color: #FFFFFF
-    `
+    display: flex
+    background-color: #FFFFFF
+`
 const SearchSection = styled.View`
     display: flex
     flex-direction: row
@@ -179,7 +179,7 @@ const ProfileNumber = styled.Text`
     color: #828282
 `
 const Sth = styled.View`
-    height: 70px
+    height: 100px
 `
 const SideCharSection = styled.View`
     position: absolute
