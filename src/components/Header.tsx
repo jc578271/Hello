@@ -22,7 +22,7 @@ const Header = ({ route, navigation }: any) => {
                 <MenuImg source={IC_MENU} />
             </MenuBtn>
             <Section1>
-                <Title>{route.name}</Title>
+                <Title>{route.params?.title || route.name}</Title>
             </Section1>
             <CamBtn>
                 <CamImg source={IC_CAM} />

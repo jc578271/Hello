@@ -2,10 +2,10 @@ import React, {memo, useEffect, useState} from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import styled from "styled-components/native";
 import { IC_SEARCH, IMG_PROFILE } from '../assets'
-import dummydb from '../assets/dummydb/db'
+import { contactDB } from '../assets/dummydb/db'
 import { groupedData, filterData } from "../utils/helper";
 
-const Contact = (props:any) => {
+const Contact = ({ route, navigation }:any) => {
     const chars = ['Digit',
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -20,7 +20,7 @@ const Contact = (props:any) => {
     }, [])
         
     useEffect(() => {
-        setDb(filterData(searchInput, dummydb))
+        setDb(filterData(searchInput, contactDB))
     }, [isMounted, searchInput])
     
 
@@ -37,15 +37,19 @@ const Contact = (props:any) => {
                 <Chartext>{char}</Chartext>
             </CharSection>
             <ItemsSection>
-                {groupedData(char, db).map(({ name, number }, key) => {
-                    return <View key={key}>{itemRender(name, number, key)}</View>
+                {groupedData(char, db).map(({ id, name, number }, key) => {
+                    return <View key={key}>{itemRender({ id, name, number }, key)}</View>
                 })}
             </ItemsSection>
         </View>
     )
 
-    const itemRender = (name: string, number: string, key: number) => (
-        <Item key={key}>
+    const itemOnPress = (item: {id:string, name: string, number: string}) => {
+        navigation.navigate('ItemContact', item)
+    }
+
+    const itemRender = ({ id, name, number }:any, key: number) => (
+        <Item key={key} onPress={() => itemOnPress({ id, name, number })}>
             <ProfileImg source={IMG_PROFILE} />
             <InfoSection style={{borderTopWidth: key==0?0:0.5}}>
                 <ProfileName>{name}</ProfileName>
@@ -147,7 +151,7 @@ const Chartext = styled.Text`
 const ItemsSection = styled.View`
     
 `
-const Item = styled.View`
+const Item = styled.TouchableOpacity`
     display: flex
     flex-direction: row
     padding: 0 16px 12px 16px

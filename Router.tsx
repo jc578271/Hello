@@ -10,6 +10,9 @@ import Footer from "./src/components/Footer";
 import Header from "./src/components/Header"
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SideNav from "./src/components/SideNav";
+import Collections from "./src/screens/Collections";
+import AddEditContact from "./src/screens/AddEditContact";
+import ItemContact from "./src/screens/ItemContact";
 // const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
@@ -17,13 +20,17 @@ const Drawer = createDrawerNavigator()
 const TabStack = ({ route, navigation }:any) => {
     return(
         <Tab.Navigator
-        initialRouteName="Home"
+            initialRouteName="Home"
             screenOptions={{header: props=><Header navigation={navigation} {...props} />}}
             tabBar={props=><Footer {...props} />}
         >
             <Tab.Screen name="Contact" component={Contact}/>
             <Tab.Screen name="History" component={History}/>
-            
+            <Tab.Screen name="Collections" component={Collections} />
+            <Tab.Group screenOptions={{headerShown: false}}>
+                <Tab.Screen name="AddEditContact" component={AddEditContact} />
+                <Tab.Screen name="ItemContact" component={ItemContact} />
+            </Tab.Group>
         </Tab.Navigator> 
     )
 }

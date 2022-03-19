@@ -34,7 +34,7 @@ const Footer = ({ state, descriptors, navigation }: any) => {
     const contactRoute = state.routes[0]
     const historyRoute = state.routes[1]
     
-    
+    if (state.index < 2) {
         return (
             <>
             <Container>
@@ -53,6 +53,10 @@ const Footer = ({ state, descriptors, navigation }: any) => {
                 height: Platform.OS == "ios" ? insets.bottom : 10}}></View>
             </>
         )
+    } else {
+        return null
+    }
+        
     
 }
 

@@ -1,8 +1,10 @@
 import React, { memo, useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, Easing, Platform, StatusBar, View } from "react-native";
+import { Animated, Platform, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IMG_PROFILE } from "../assets";
+import { collectionDB } from '../assets/dummydb/db'
+
 
 const SideNav = ({ state, navigation, descriptors }:any) => {
     const [isExpanded, setIsExpand] = useState(true)
@@ -22,6 +24,19 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         }).start()
     }, [isExpanded])
 
+    const itemOnPress = ({title, collections}:any) => {
+        navigation.navigate('Collections', {
+            title,
+            collections
+        })
+    }
+
+    const itemRender = ({title, collections}) => (
+        <ItemSection onPress={() => itemOnPress({title, collections})}>
+            <ItemIc source={IC_ITEMCOLLECTION}/>
+            <ItemText>{title}</ItemText>
+        </ItemSection>
+    )
 
     return (
         <>
@@ -54,30 +69,7 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
             
             <ListSection onLayout={e => setListHeight(e.nativeEvent.layout.height)}>
                 <Animated.View style={[animation.getLayout()]}>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
-                    <ItemSection>
-                        <ItemIc source={IC_ITEMCOLLECTION}/>
-                        <ItemText>All</ItemText>
-                    </ItemSection>
+                    {collectionDB.map((collection, key) => itemRender(collection))}
                 </Animated.View>
             </ListSection>
             
