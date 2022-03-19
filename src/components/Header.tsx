@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View } from "react-native";
+import { Platform, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_MENU, IC_CAM } from "../assets";
@@ -9,7 +9,12 @@ const Header = ({ route, navigation }: any) => {
     const insets = useSafeAreaInsets()
     return (
         <>
-        <View style={{backgroundColor: "#FFFFFF", height: insets.top, width: '100%'}}></View>
+        <View style={{
+            backgroundColor: "#FFFFFF",
+            height: Platform.OS == "ios" ? insets.top: StatusBar.currentHeight
+        }}>
+            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content"/>
+        </View>
         <Container>
             <MenuBtn
                 onPress={() => navigation.openDrawer()}

@@ -4,7 +4,6 @@ import Footer from "./Footer";
 import Header from "./Header";
 import GestureRecognizer from 'react-native-swipe-gestures'
 import { useState } from "react";
-import Drawer from "./Drawer";
 
 interface Props {
     children: any,

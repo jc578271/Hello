@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { Dimensions, Text, View } from "react-native";
+import { Dimensions, Platform, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import { IC_ADDBTN, IMG_NAVBG, IC_LIST, IC_HISTORY } from "../assets";
@@ -48,7 +48,9 @@ const Footer = ({ state, descriptors, navigation }: any) => {
                 <Sth></Sth>
                 {itemRender(descriptors[historyRoute.key].route.name, 1)}
             </Container>
-            <View style={{backgroundColor: '#F2A54A', height: insets.bottom}}></View>
+            <View style={{
+                backgroundColor: '#F2A54A',
+                height: Platform.OS == "ios" ? insets.bottom : 10}}></View>
             </>
         )
     
