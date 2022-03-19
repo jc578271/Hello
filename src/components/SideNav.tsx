@@ -15,7 +15,8 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         let initVal = isExpanded ? listHeight : 0
         let finalVal = isExpanded ? 0 : listHeight
         animation.setValue({x: 0, y:initVal})
-        Animated.spring(animation, { 
+        // @ts-ignore
+        Animated.spring(animation, {
             toValue: {x:0, y: finalVal}
         }).start()
     }, [isExpanded])
