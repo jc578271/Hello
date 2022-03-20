@@ -17,6 +17,7 @@ const Contact = ({ route, navigation }:any) => {
 
     useEffect(() => {
         setMounted(true)
+        console.log("hello")
     }, [])
         
     useEffect(() => {
@@ -34,7 +35,7 @@ const Contact = ({ route, navigation }:any) => {
         <View>
             <CharSection>
                 <BgCharSection></BgCharSection>
-                <Chartext>{char}</Chartext>
+                <CharText>{char}</CharText>
             </CharSection>
             <ItemsSection>
                 {groupedData(char, db).map(({ id, name, number }, key) => {
@@ -99,50 +100,50 @@ const Contact = ({ route, navigation }:any) => {
 export default memo(Contact)
 
 const Container =  styled.View`
-    display: flex
-    background-color: #FFFFFF
+    display: flex;
+    background-color: #FFFFFF;
 `
 const SearchSection = styled.View`
-    display: flex
-    flex-direction: row
-    align-items: center
-    background-color: #F2f2f2
-    opacity: 0.5
-    border-radius: 6px
-    overflow: hidden
-    margin: 0 16px 10px 16px
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #F2f2f2;
+    opacity: 0.5;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0 16px 10px 16px;
     
 `
 const SearchIcon = styled.Image`
-    height: 16px
-    width: 16px
-    margin-left: 10px
+    height: 16px;
+    width: 16px;
+    margin-left: 10px;
 `
 const SearchInput = styled.TextInput`
-    flex: auto
-    margin: 0
-    font-size: 13px
-    font-weight: 300
-    padding: 10px
+    flex: auto;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 300;
+    padding: 10px;
 `
 const ScrollContent = styled.ScrollView`
-    display: flex
+    display: flex;
 `
 const CharSection = styled.View`
-    height: 36px
-    justify-content: center
-    padding: 0 16px
+    height: 36px;
+    justify-content: center;
+    padding: 0 16px;
 `
 const BgCharSection = styled.View`
-    position: absolute
-    background-color: #E0E0E0
-    opacity: 0.5
-    top: 0
-    left: 0
-    right: 0
-    bottom: 0
+    position: absolute;
+    background-color: #E0E0E0;
+    opacity: 0.5;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 `
-const Chartext = styled.Text`
+const CharText = styled.Text`
     color: #333333;
     font-weight: 500;
     font-size: 15px;
@@ -152,44 +153,44 @@ const ItemsSection = styled.View`
     
 `
 const Item = styled.TouchableOpacity`
-    display: flex
-    flex-direction: row
-    padding: 0 16px 12px 16px
-    align-items: center
+    display: flex;
+    flex-direction: row;
+    padding: 0 16px 12px 16px;
+    align-items: center;
 `
 const ProfileImg = styled.Image`
-    margin-top: 14px
+    margin-top: 14px;
     height: 40px;
     width: 40px;
     border-radius: 100px;
 `
 const InfoSection = styled.View`
-    margin: 0 16px
-    padding-top: 15px
+    margin: 0 16px;
+    padding-top: 15px;
     border-color: #BDBDBD;
-    flex: auto
+    flex: auto;
 `
 const ProfileName = styled.Text`
-    font-weight: 500
-    font-size: 16px
-    line-height: 16px
-    color: #333333
-    margin: 5px 0
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 16px;
+    color: #333333;
+    margin: 5px 0;
 `
 const ProfileNumber = styled.Text`
-    font-weight: 400
-    font-size: 14px
-    line-height: 16px
-    color: #828282
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    color: #828282;
 `
 const Sth = styled.View`
-    height: 110px
+    height: 110px;
 `
 const SideCharSection = styled.View`
-    position: absolute
-    right: 10px
-    top: 10px
-    display: flex
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    display: flex;
 `
 const SideCharBtn = styled.TouchableOpacity`
     

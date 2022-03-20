@@ -40,7 +40,7 @@ const Home = ({ navigation }: Props) => {
 export default memo(Home)
 
 const Container = styled.View`
-    background-color: #FFFFFF
+    background-color: #FFFFFF;
     display: flex;
     height: 100%;
 `
@@ -51,7 +51,6 @@ const Section1 = styled.View`
 
 const LogoAppIcon = styled.Image`
     margin-top: 50px;
-    resizeMode: cover;
     width: 200px;
     height: 200px;
 
@@ -60,11 +59,10 @@ const HomeBg = styled.Image`
     position: absolute;
     bottom: 0;
     left: 0;
-    resizeMode: contain;
     z-index: -1;
 `
 const Section2 = styled.View`
-    display: flex
+    display: flex;
     align-items: center;
     flex: 1;
     
@@ -73,8 +71,8 @@ const Title = styled.Text`
     font-weight: 700;
     font-size: 30px;
     line-height: 35px;
-    margin-top: 20px
-    margin-bottom: 5px
+    margin-top: 20px;
+    margin-bottom: 5px;
     letter-spacing: 0.12px;
 
     color: #F2A54A;
@@ -91,17 +89,17 @@ const SubTitle = styled.Text`
     color: #333333;
 `
 const SmallLogoSection = styled.View`
-    flex: auto
+    flex: auto;
     
 `
 const SmallLogoIcon = styled.Image`
-    margin: auto
+    margin: auto;
 `
 const Section3 = styled.View`
-    margin: 0 20px 30px 20px
+    margin: 0 20px 30px 20px;
 `
 const NonAuthText = styled.Text`
-    margin-bottom: 20px
+    margin-bottom: 20px;
     font-weight: 400;
     font-size: 15px;
     line-height: 20px;
@@ -117,8 +115,8 @@ const LoginBtn = styled.TouchableOpacity`
 
     background: #F2A54A;
     border-radius: 4px;
-    justify-content: center
-    margin-bottom: 10px
+    justify-content: center;
+    margin-bottom: 10px;
 `
 const LoginText = styled.Text`
     font-weight: 500;

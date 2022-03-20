@@ -18,19 +18,20 @@ const Footer = ({ state, descriptors, navigation }: any) => {
     const itemRender = (title: string, index: number) => {
         const isFocused = state.index == index
         return (
-        <WrapItem>
-            <ItemBtn
-            onPress={() => navigation.navigate(title)}>
-                <ItemImg 
-                    resizeMode="cover" source={labelIcons[title][0]}
-                    style={{tintColor: isFocused ? 'white' : '#DADADA'}}
-                />
-                <ItemText style={{color: isFocused ? 'white' : '#DADADA'}}>
-                    {labelIcons[title][1]}
-                </ItemText>
-            </ItemBtn>
-        </WrapItem>
-    )}
+            <WrapItem>
+                <ItemBtn
+                onPress={() => navigation.navigate(title)}>
+                    <ItemImg 
+                        resizeMode="cover" source={labelIcons[title][0]}
+                        style={{tintColor: isFocused ? 'white' : '#DADADA'}}
+                    />
+                    <ItemText style={{color: isFocused ? 'white' : '#DADADA'}}>
+                        {labelIcons[title][1]}
+                    </ItemText>
+                </ItemBtn>
+            </WrapItem>
+        )
+    }
     const contactRoute = state.routes[0]
     const historyRoute = state.routes[1]
     
@@ -40,7 +41,7 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             <Container>
                 <WrapBtn>
                     <NavBg source={IMG_NAVBG} />
-                    <AddBtn>
+                    <AddBtn onPress={() => navigation.navigate('AddEditContact')}>
                         <AddImg resizeMode="contain" source={IC_ADDBTN} />
                     </AddBtn>
                 </WrapBtn>
@@ -64,58 +65,58 @@ export default memo(Footer)
 
 const Container = styled.View`
     display: flex;
-    flex-direction: row
-    align-items: flex-end
-    height: 0
+    flex-direction: row;
+    align-items: flex-end;
+    height: 0;
 `
 const WrapItem = styled.View`
-    flex: 1
-    align-items: center
-    justify-content: flex-end
-    justify-self: end
-    height: 55px
+    flex: 1;
+    align-items: center;
+    justify-content: flex-end;
+    justify-self: end;
+    height: 55px;
 `
 const ItemBtn = styled.TouchableOpacity`
-    display: flex
+    display: flex;
     align-self: center;
-    justify-content: center
+    justify-content: center;
 `
 
 const WrapBtn = styled.View`
-    position: absolute
-    left:0
-    right: 0
-    top: -100px
-    bottom: 0
-    display: flex
+    position: absolute;
+    left:0;
+    right: 0;
+    top: -100px;
+    bottom: 0;
+    display: flex;
 `
 const Sth = styled.View`
-    width: 85px
+    width: 85px;
 `
 const AddBtn = styled.TouchableOpacity`
-    width: 85px
-    height: 85px
+    width: 85px;
+    height: 85px;
     align-self: center;
 `
 const AddImg = styled.Image`
     align-self: center;
-    width: 100%
-    height: 100%
+    width: 100%;
+    height: 100%;
 `
 const NavBg = styled.Image`
     width: ${width}px;
     position: absolute;
-    bottom: 0
+    bottom: 0;
 `
 const ItemImg = styled.Image`
-    width: 30px
-    height: 30px
-    margin: auto
+    width: 30px;
+    height: 30px;
+    margin: auto;
 `
 const ItemText = styled.Text`
-    font-weight: 400
-    font-size: 10px
-    line-height: 12px
-    text-align: center
-    margin-top: 4px
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 12px;
+    text-align: center;
+    margin-top: 4px;
 `
