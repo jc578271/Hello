@@ -1,13 +1,23 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Platform, StatusBar, Text, View, BackHandler, TextInput } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import moment from "moment"
+import * as ImagePicker from "react-native-image-picker"
 import { IC_EDITPROFILEIMG, IC_GREENADD, IC_REDDELETE, IMG_DEFAULTPROFILE } from "../assets";
+
+/* toggle includeExtra */
+const includeExtra = true;
 
 const AddItemContact = ({ navigation }) => {
     const insets = useSafeAreaInsets()
+    const [response, setResponse] = useState<any>(null)
+    const [profileInfo, setProfileInfo] = useState({
+        firstName: "",
+        lastName: "",
+        organization: ""
+    })
     const [phone, setPhone] = useState({
         type: "numeric",
         title: "phone number",
@@ -41,65 +51,87 @@ const AddItemContact = ({ navigation }) => {
         id: -1
     })
 
-    useEffect(() => {
-        // onBack of device handler
-        BackHandler.addEventListener('hardwareBackPress',restoreState)
-        return () => {
-            BackHandler.removeEventListener('hardwareBackPress', restoreState)
-        }
-    }, [])
+    // useEffect(() => {
+    //     // onBack of device handler
+    //     BackHandler.addEventListener('hardwareBackPress',restoreState)
+    //     return () => {
+    //         BackHandler.removeEventListener('hardwareBackPress', restoreState)
+    //     }
+    // }, [])
 
-    const restoreState = () => {
-        setPhone({...phone, list: [], isEditing: false,id: -1, count: 0 })
-        setEmail({ ...email, list: [], isEditing: false, id: -1, count: 0 })
-        setAddress({ ...address, list: [], isEditing: false, id: -1, count: 0 })
-        setBirthday({ ...birthday, list: [], isEditing: false, id: -1, count: 0 })
+    const restoreState = useCallback(() => {
+        setProfileInfo(prev => ({...prev, firstName: "", lastName:"", organization:""}))
+        setPhone(prev => ({ ...prev, list: [], isEditing: false, id: -1, count: 0 }))
+        setEmail(prev => ({ ...prev, list: [], isEditing: false, id: -1, count: 0 }))
+        setAddress(prev => ({ ...prev, list: [], isEditing: false, id: -1, count: 0 }))
+        setBirthday(prev => ({ ...prev, list: [], isEditing: false, id: -1, count: 0 }))
         navigation.goBack()
         return true
-    }
+    }, [])
 
-    const infoDeleteOnPress = (typeInfo, key, setInfo) => {
-        const { list } = typeInfo
-        let newList = list
-        newList.splice(key, 1)
-        setInfo({ ...typeInfo, list: newList })
-    }
+    const camOnPress = useCallback(() => {
+        ImagePicker.launchImageLibrary({
+            mediaType: 'photo',
+            includeBase64: false,
+            includeExtra,
+        }, setResponse)
+    }, [])
 
-    const infoOnChange = (typeInfo, key, text, setInfo) => {
-        const {list} = typeInfo
-        let newList = list
-        newList[key] = text
-        setInfo({ ...typeInfo, list: newList })
-    }
-
-    const addInfoOnPress = (typeInfo, setTypeInfo) => {
-        
-        let newInput = typeInfo.type == "datePicker" ? moment().valueOf() : ''
-        setTypeInfo({
-            ...typeInfo,
-            list: [...typeInfo.list, newInput],
-            isEditing: true,
-            id: typeInfo.list.length
+    const infoDeleteOnPress = useCallback((key, setInfo) => {
+        setInfo(prev => {
+            const { list, count } = prev
+            let newList = list
+            newList.splice(key, 1)
+            return { ...prev, list: newList, count: count - 1 }
         })
-    }
+    }, [])
 
-    const onDateConfirm = (date, key) => {
-        infoOnChange(birthday, key, date, setBirthday)
-        setBirthday(prev => ({...prev, isEditing: false}))
-        // console.log(date)
-    }
-    const onDateCancel = (key) => {
+    const infoOnTextInputBlur = useCallback((key, setInfo) => {
+        setInfo(prev => {
+            let newList = prev.list.filter(item => item.trim() != "")
+            let newCount = newList.length
+            return { ...prev, id: -1, isEditing: false, count: newCount, list: newList }
+        })
+    }, [])
+
+    const infoOnChange = useCallback((key, text, setInfo) => {
+        setInfo(prev=>{
+            const { list } = prev
+            let newList = list
+            newList[key] = text
+            return { ...prev, list: newList }
+        })
+    }, [])
+
+    const addInfoOnPress = useCallback((setTypeInfo) => {
+        setTypeInfo(prev=> ({
+            ...prev,
+            count: prev.count + 1,
+            isEditing: true,
+            id: prev.count
+        }))
+    }, [birthday.count])
+
+    const onDateConfirm = useCallback((date, key) => {
         setBirthday(prev => {
-            let newList = prev.list
-            console.log(newList)
-            if (newList.length=0) {
-                newList.splice(key, 1)
-            }
+            const { list } = prev
+            let newList = list
+            newList[key] = date
             return { ...prev, isEditing: false, list: newList }
         })
-    }
+    }, [birthday.count])
 
-    const dialogModalRender = (key) => {
+    const onDateCancel = useCallback(() => {
+        setBirthday(prev => {
+            if (prev.count == 1 && prev.list.length == 1) {
+                return { ...prev, isEditing: false }
+            } else {
+                return { ...prev, isEditing: false, count: prev.count - 1 }
+            }
+        })
+    }, [birthday.count])
+
+    const dialogModalRender = useCallback((key) => {
         const { isEditing, list } = birthday
         return (
             <DateTimePickerModal
@@ -107,52 +139,53 @@ const AddItemContact = ({ navigation }) => {
                 isVisible={isEditing}
                 mode="date"
                 onConfirm={(date) => onDateConfirm(date, key)}
-                onCancel={()=>onDateCancel(key)}
+                onCancel={() => onDateCancel()}
             />
         )
-    }
+    }, [birthday.count])
 
-    const editingInfoRender = (
-            typeInfo: { 
-                list: any[],
-                isEditing:boolean,
-                id:number,
-                type: any,
-                title:string 
-            },
-            setInfo
-        ) => {
-        const { list, isEditing, id, type, title } = typeInfo
-        return list.map((x:any, key:number) => (
-            <EditSection key={key}>
-                <DeleteBtn onPress={() => infoDeleteOnPress(typeInfo, key, setInfo)}>
-                    <DeleteIc source={IC_REDDELETE} />
-                </DeleteBtn>
-                {isEditing && id == key && type != "datePicker" ? (
-                    <EditTextInput
-                        autoFocus={true}
-                        keyboardType={type}
-                        placeholder={`add your ${title}`}
-                        value={list[key]}
-                        onBlur={() => setInfo({ ...typeInfo, id: -1, isEditing: false })}   
-                        onChangeText={(text) => infoOnChange(typeInfo, key, text, setInfo)}
-                    />
-                ) : isEditing && id == key && type == "datePicker" ? dialogModalRender(key) : (
-                    <ContextButton onPress={() => setInfo({ ...typeInfo, id: key, isEditing: true })}>
-                        <ContextText>{type == "datePicker" ? moment(list[key]).format("MMM Do YYYY") : list[key]}</ContextText>
-                    </ContextButton>
-                )}
-            </EditSection>
-        ))
-    }
-
-    // console.log(phoneRef, phone.list.length)
+    const editingInfoRender = useCallback((
+        typeInfo: {
+            list: any[],
+            isEditing: boolean,
+            id: number,
+            type: any,
+            title: string,
+            count: number
+        },
+        setInfo
+    ) => {
+        const { list, isEditing, id, type, title, count } = typeInfo
+        return Array(count).fill(0).map((x: any, key: number) => {
+            return (
+                <EditSection key={key}>
+                    <DeleteBtn onPress={() => infoDeleteOnPress(key, setInfo)}>
+                        <DeleteIc source={IC_REDDELETE} />
+                    </DeleteBtn>
+                    {isEditing && id == key && type != "datePicker" ? (
+                        <EditTextInput
+                            autoFocus={true}
+                            keyboardType={type}
+                            placeholder={`add ${title}`}
+                            value={list[key]}
+                            onBlur={() => infoOnTextInputBlur(key, setInfo)}
+                            onChangeText={(text) => infoOnChange(key, text, setInfo)}
+                        />
+                    ) : isEditing && type == "datePicker" ? dialogModalRender(key) : (
+                        <ContextButton onPress={() => setInfo({ ...typeInfo, id: key, isEditing: true })}>
+                            <ContextText>{type == "datePicker" ? moment(list[key]).format("MMM Do YYYY") : list[key]}</ContextText>
+                        </ContextButton>
+                    )}
+                </EditSection>
+            )
+        })
+    }, [birthday])
 
     return (
         <>
         <View style={{
             backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight,
+            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
         }}>
         </View>
         <Container>
@@ -167,14 +200,21 @@ const AddItemContact = ({ navigation }) => {
                 </DoneBtn>
             </HeaderSection>
             <ProfileImgSection>
-                <ProfileImg source={IMG_DEFAULTPROFILE} />
-                <CamIcon source={IC_EDITPROFILEIMG} />
+                {console.log(response)}
+                    <ProfileImg 
+                        source={response?.assets ? {uri: response.assets[0].uri } : IMG_DEFAULTPROFILE}
+                        style={response?.assets && {width: 100, height: 100}}
+                    />
+                <CamBtn onPress={camOnPress}>
+                    <CamIcon source={IC_EDITPROFILEIMG} />
+                </CamBtn>
+                
             </ProfileImgSection>
             <SurnameSection>
-                <SurnameInput placeholder="Surname"/>
+                <SurnameInput placeholder="First name"/>
             </SurnameSection>
             <LastnameSection>
-                <LastnameInput placeholder="Firstname"/>
+                <LastnameInput placeholder="Last name"/>
             </LastnameSection>
             <OrganizationSection>
                 <OrganizationInput placeholder="Organization"/>
@@ -182,7 +222,7 @@ const AddItemContact = ({ navigation }) => {
             <AddSection>
                 {editingInfoRender(phone, setPhone)}
                 <AddGroup>
-                    <AddBtn onPress={() => addInfoOnPress(phone, setPhone)}>
+                    <AddBtn onPress={() => addInfoOnPress(setPhone)}>
                         <AddIc source={IC_GREENADD} />
                     </AddBtn>
                     <AddText>Add phone number</AddText>
@@ -191,7 +231,7 @@ const AddItemContact = ({ navigation }) => {
             <AddSection>
                 {editingInfoRender(email, setEmail)}
                 <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress(email, setEmail)}>
+                        <AddBtn onPress={() => addInfoOnPress(setEmail)}>
                         <AddIc source={IC_GREENADD} />
                     </AddBtn>
                     <AddText>Add email</AddText>
@@ -200,7 +240,7 @@ const AddItemContact = ({ navigation }) => {
             <AddSection>
                 {editingInfoRender(address, setAddress)}
                 <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress(address, setAddress)}>
+                        <AddBtn onPress={() => addInfoOnPress(setAddress)}>
                         <AddIc source={IC_GREENADD} />
                     </AddBtn>
                     <AddText>Add address</AddText>
@@ -210,7 +250,7 @@ const AddItemContact = ({ navigation }) => {
                 {editingInfoRender(birthday, setBirthday)}
                 {birthday.list.length == 0 ? (
                     <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress(birthday, setBirthday)}>
+                        <AddBtn onPress={() => addInfoOnPress(setBirthday)}>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add birthday</AddText>
@@ -223,7 +263,13 @@ const AddItemContact = ({ navigation }) => {
     )
 }
 
-export default AddItemContact
+export default memo(AddItemContact)
+
+interface Action {
+    title: string;
+    type: 'capture' | 'library';
+    options: ImagePicker.CameraOptions | ImagePicker.ImageLibraryOptions;
+}
 
 const Container = styled.ScrollView`
     background-color: #FFFFFF;
@@ -278,15 +324,19 @@ const ProfileImgSection = styled.View`
 const ProfileImg = styled.Image`
     height: 80px;
     width: 80px;
+    border-radius: 100px;
 `
-const CamIcon = styled.Image`
+const CamBtn = styled.TouchableOpacity`
     position: absolute;
     bottom: 0;
     right: 0;
 `
+const CamIcon = styled.Image`
+    
+`
 const SurnameSection = styled.View`
     margin-top: 8px;
-    padding: 16px 11px;
+    padding: 11px 11px;
     border-bottom-width: 0.5px;
     border-bottom-color: solid rgba(0, 0, 0, 0.1);
 `
