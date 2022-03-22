@@ -10,7 +10,7 @@ const ItemContact = ({ navigation }) => {
         <>
         <View style={{
             backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight,
+            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
         }}>
             <BackgroundColor></BackgroundColor>
         </View>
