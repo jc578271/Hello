@@ -74,10 +74,11 @@ const AddItemContact = ({ navigation }) => {
 
     const addInfoOnPress = (typeInfo, setTypeInfo) => {
         
-        let newInput = typeInfo.type == "datePicker" ? moment().valueOf() : ''
+        // let newInput = typeInfo.type == "datePicker" ? moment().valueOf() : ''
         setTypeInfo({
             ...typeInfo,
-            list: [...typeInfo.list, newInput],
+            // list: [...typeInfo.list, newInput],
+            count: typeInfo.count+1,
             isEditing: true,
             id: typeInfo.list.length
         })
