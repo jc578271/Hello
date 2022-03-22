@@ -47,14 +47,14 @@ const Contact = ({ route, navigation }:any) => {
 
     const groupByCharRender = useCallback(() => {
         let groupedContact = groupedData(db)
-        return Object.keys(groupedContact).map((char, key) => (
+        return Object.keys(groupedContact).map((char, key) => groupedContact[char].length && (
             <View onLayout={e => onChangePosYs(e, char)} key={key}>
                 <CharSection>
                     <BgCharSection></BgCharSection>
                     <CharText>{char}</CharText>
                 </CharSection>
                 <ItemsSection>
-                    {groupedContact[key].map(({ id, name, number }, index) => (
+                    {groupedContact[char].map(({ id, name, number }, index) => (
                         <View key={index}>{itemRender({ id, name, number }, key)}</View>
                     ))}
                 </ItemsSection>

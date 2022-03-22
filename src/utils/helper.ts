@@ -12,8 +12,8 @@ export const groupedData = (db: any[]) => {
     })
     let sortedResult = Object.keys(result).sort().reduce((obj, key) => {
         obj[key] = result[key].sort((a, b) => {
-            let aWords = a.split(' '),
-                bWords = b.split(' ')
+            let aWords = a.name.split(' '),
+                bWords = b.name.split(' ')
             let aLastname = aWords[aWords.length - 1],
                 bLastname = bWords[bWords.length - 1]
             return aLastname < bLastname ? -1 :1
