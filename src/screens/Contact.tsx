@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useCallback, useEffect, useState} from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import styled from "styled-components/native";
 import { IC_SEARCH, IMG_PROFILE } from '../assets'
@@ -31,19 +31,36 @@ const Contact = ({ route, navigation }:any) => {
         setPosYs(newPosYs)
     }
 
-    const groupByCharRender = (char:string, db: any[]) => (
-        <View>
-            <CharSection>
-                <BgCharSection></BgCharSection>
-                <CharText>{char}</CharText>
-            </CharSection>
-            <ItemsSection>
-                {groupedData(char, db).map(({ id, name, number }, key) => {
-                    return <View key={key}>{itemRender({ id, name, number }, key)}</View>
-                })}
-            </ItemsSection>
-        </View>
-    )
+    // const groupByCharRender = (char:string, db: any[]) => (
+    //     <View>
+    //         <CharSection>
+    //             <BgCharSection></BgCharSection>
+    //             <CharText>{char}</CharText>
+    //         </CharSection>
+    //         <ItemsSection>
+    //             {groupedData(char, db).map(({ id, name, number }, key) => {
+    //                 return <View key={key}>{itemRender({ id, name, number }, key)}</View>
+    //             })}
+    //         </ItemsSection>
+    //     </View>
+    // )
+
+    const groupByCharRender = useCallback(() => {
+        let groupedContact = groupedData(db)
+        return Object.keys(groupedContact).map((char, key) => (
+            <View onLayout={e => onChangePosYs(e, char)} key={key}>
+                <CharSection>
+                    <BgCharSection></BgCharSection>
+                    <CharText>{char}</CharText>
+                </CharSection>
+                <ItemsSection>
+                    {groupedContact[key].map(({ id, name, number }, index) => (
+                        <View key={index}>{itemRender({ id, name, number }, key)}</View>
+                    ))}
+                </ItemsSection>
+            </View>
+        ))
+    }, [])
 
     const itemOnPress = (item: {id:string, name: string, number: string}) => {
         navigation.navigate('ItemContact', item)
@@ -71,13 +88,14 @@ const Contact = ({ route, navigation }:any) => {
                 />
             </SearchSection>
             <ScrollContent ref={view => setScrollRef(view)}>
-                {chars.map((char, key) => {
+                {/* {chars.map((char, key) => {
                     return groupedData(char, db).length >0
                     ? <View onLayout={e => onChangePosYs(e, char)} key={key}>
                         {groupByCharRender(char, db)}
                     </View>
                     : null
-                })}
+                })} */}
+                {groupByCharRender()}
                 <Sth></Sth>
             </ScrollContent>
             <SideCharSection>
