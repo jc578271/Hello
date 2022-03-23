@@ -46,13 +46,13 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
             }}>
         </View>
         <Container>
-            <ProflileSection>
+            <ProfileSection>
                 <ProfileImg source={IMG_PROFILE} />
                 <TextSection>
                     <NameText>Nguyen Le Hoang</NameText>
                     <SubText>Hello</SubText>
                 </TextSection>
-            </ProflileSection>
+            </ProfileSection>
             <AddCollectionSection>
                 <AddBtn>
                     <AddImgBtn source={IC_ADDCOLLECTION} />
@@ -84,7 +84,7 @@ export default memo(SideNav)
 const Container = styled.View`
     display: flex;
 `
-const ProflileSection = styled.View`
+const ProfileSection = styled.View`
     display: flex;
     flex-direction: row;
     padding: 5px 20px 12px 20px;

@@ -29,7 +29,7 @@ export const groupedData = (db: RawContact[]) => {
 export const filterData = (searchInput: string, db: RawContact[]) => {
     // console.log("helper:", db)
     return db.filter(({fullName, phones}) => {
-        return phones.some(item => item.toLowerCase().includes(searchInput.toLowerCase()))
-        || fullName.toLowerCase().includes(searchInput.toLowerCase())
+        return phones.some(item => item.trim().toLowerCase().includes(searchInput.trim().toLowerCase()))
+            || fullName.trim().toLowerCase().includes(searchInput.trim().toLowerCase())
     })
 }

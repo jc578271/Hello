@@ -57,10 +57,11 @@ const AddItemContact = ({ navigation }) => {
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
-            isValidPhone = !!params.phones.length
+            isValidPhone = !!params.phones.filter(item=>item.trim()!="").length
 
         setIsValid({ fullName: isValidName, phone: isValidPhone })
-    }, [params])
+        
+    }, [JSON.stringify(params)])
 
     const restoreState = useCallback(() => {
         navigation.goBack()
@@ -199,14 +200,18 @@ const AddItemContact = ({ navigation }) => {
                 type: "error"
             })
         } else {
-            dispatch(updateContactAction({
+            let submit = {
                 ...params,
                 id: moment().valueOf().toString(),
-                fullName: params.firstName + params.lastName
-            }))
-            console.log(params)
+                fullName: params.firstName + params.lastName,
+                phones: params.phones.filter(item => item.trim() != ""),
+                emails: params.emails.filter(item => item.trim() != ""),
+                addresses: params.addresses.filter(item => item.trim() != "")
+            }
+            dispatch(updateContactAction(submit))
+            console.log(submit)
             setSubmitted(!isSubmitted)
-            // navigation.navigate("Contact")
+            navigation.navigate("Contact")
         }
 
     }, [isValid, params])
