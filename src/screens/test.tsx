@@ -16,7 +16,7 @@ const AddItemContact = ({ navigation }) => {
     const [params, setParams] = useState({
         firstName: "",
         lastName: "",
-        organization:"",
+        organization: "",
         avatar: "",
         phones: [],
         emails: [],
@@ -24,16 +24,35 @@ const AddItemContact = ({ navigation }) => {
         birthday: []
     })
     const [editingType, setEditingType] = useState({
-        type: "",
-        typeKeyboard: "default",
-        isEditing: false,
-        id: -1,
-        count: 0
+        phones: {
+            typeKeyboard: "numeric",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        emails: {
+            typeKeyboard: "email-address",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        addresses: {
+            typeKeyboard: "default",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        birthday: {
+            typeKeyboard: "datePicker",
+            isEditing: false,
+            id: -1,
+            count: 0
+        }
     })
     const [isSubmitted, setSubmitted] = useState(false)
     const [isValid, setIsValid] = useState({ fullName: false, phone: false })
     const dispatch = useDispatch()
-    
+    let ref = useRef<any>({}).current
 
     useEffect(() => {
         setParams({
@@ -47,26 +66,46 @@ const AddItemContact = ({ navigation }) => {
             birthday: []
         })
         setEditingType({
-            type: "",
-            typeKeyboard: "default",
-            isEditing: false,
-            id: -1,
-            count: 0
+            phones: {
+                typeKeyboard: "numeric",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            emails: {
+                typeKeyboard: "email-address",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            addresses: {
+                typeKeyboard: "default",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            birthday: {
+                typeKeyboard: "datePicker",
+                isEditing: false,
+                id: -1,
+                count: 0
+            }
         })
     }, [isSubmitted])
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
-            isValidPhone = !!params.phones.filter(item=>item.trim()!="").length
+            isValidPhone = !!params.phones.filter(item => item.trim() != "").length
 
         setIsValid({ fullName: isValidName, phone: isValidPhone })
-    }, [params])
+
+    }, [JSON.stringify(params)])
 
     const restoreState = useCallback(() => {
         navigation.goBack()
     }, [])
 
-    const profileInfoOnChange = useCallback((key: string, text:string) => {
+    const profileInfoOnChange = useCallback((key: string, text: string) => {
         setParams(prev => ({
             ...prev,
             [key]: text
@@ -79,20 +118,22 @@ const AddItemContact = ({ navigation }) => {
             includeBase64: false,
             includeExtra: true,
         }, (res) => {
-            setParams(prev => ({ ...prev, avatar: res.assets?.length ? res.assets[0]?.uri : ""}));
+            setParams(prev => ({ ...prev, avatar: res.assets?.length ? res.assets[0]?.uri : "" }));
         })
     }, [])
 
 
-    const infoDeleteOnPress = useCallback((key:number, typeInfo:string) => {
-        setParams(prev=> {
+    const infoDeleteOnPress = useCallback((key: number, typeInfo: string) => {
+        setParams(prev => {
             let newList = prev[typeInfo]
             newList.splice(key, 1)
             setEditingType(editingPrev => ({
                 ...editingPrev,
-                type: typeInfo,
-                count: newList.length,
-                id: newList.indexOf("")
+                [typeInfo]: {
+                    ...editingPrev[typeInfo],
+                    count: newList.length,
+                    id: newList.indexOf("")
+                }
             }))
             return {
                 ...prev,
@@ -101,8 +142,8 @@ const AddItemContact = ({ navigation }) => {
         })
     }, [])
 
-    const infoOnChange = useCallback((key:number, text:string, typeInfo:string) => {
-        setParams(prev=> {
+    const infoOnChange = useCallback((key: number, text: string, typeInfo: string) => {
+        setParams(prev => {
             let newList = prev[typeInfo]
             newList[key] = text
             return {
@@ -112,30 +153,43 @@ const AddItemContact = ({ navigation }) => {
         })
     }, [params])
 
-    const addInfoOnPress = useCallback((typeInfo:string, typeKeyboard: string) => {
-        setParams(prev=> {
-            let newList = prev[typeInfo].filter(item => item.trim() != "")
+    const addInfoOnPress = useCallback((typeInfo: string) => {
+        setParams(prev => {
+            let newList = prev[typeInfo].map(item=>item.trim())
             let newCount = newList.length
-            setEditingType({
-                typeKeyboard,
-                type: typeInfo,
-                count: newCount+1,
-                isEditing: true,
-                id: newCount
-            })
+            if (typeInfo == "birthday") {
+                newCount = 1
+            } else if (newList.indexOf("") == -1) {
+                newList.push("")
+                newCount = newList.length
+            }
+             
+            setEditingType(editPrev=> ({
+                ...editPrev,
+                [typeInfo]: {
+                    ...editPrev[typeInfo],
+                    count: newCount,
+                    id: newList.indexOf(""),
+                    isEditing: true
+                }
+            }))
             return {
-                ...prev
+                ...prev,
+                [typeInfo]: newList
             }
         })
-    }, [editingType])
+        ref[typeInfo]?.focus()
+    }, [])
 
     const onDateConfirm = useCallback((date, key) => {
-        setEditingType(prev=>({
+        setEditingType(prev => ({
             ...prev,
-            type: "birthday",
-            isEditing: false
+            birthday: {
+                ...prev.birthday,
+                isEditing: false
+            }
         }))
-        setParams(prev=> {
+        setParams(prev => {
             let newList = prev.birthday
             newList[key] = moment(date).valueOf()
             return {
@@ -143,38 +197,53 @@ const AddItemContact = ({ navigation }) => {
                 birthday: newList
             }
         })
-    }, [editingType.count])
+    }, [editingType.birthday])
 
     const onDateCancel = useCallback(() => {
         setEditingType(prev => {
-            if(prev.count == 1 && params.birthday.length == 1) {
-                return{
+            if (prev.birthday.count == 1 && params.birthday.length == 1) {
+                return {
                     ...prev,
-                    type: "birthday",
-                    isEditing: false
-                } 
+                    birthday: {
+                        ...prev.birthday,
+                        isEditing: false
+                    }
+                }
             } else {
                 return {
                     ...prev,
-                    type: "birthday",
-                    count: prev.count - 1,
-                    isEditing: false
+                    birthday: {
+                        ...prev.birthday,
+                        count: prev.birthday.count - 1,
+                        isEditing: false
+                        }
                 }
             }
         })
-    }, [editingType])
+    }, [editingType.birthday])
 
     const dialogModalRender = useCallback((key) => {
         return (
             <DateTimePickerModal
                 date={moment(params.birthday[key]).toDate()}
-                isVisible={editingType.isEditing && editingType.type=="birthday"}
+                isVisible={editingType.birthday.isEditing}
                 mode="date"
                 onConfirm={(date) => onDateConfirm(date, key)}
                 onCancel={() => onDateCancel()}
             />
         )
-    }, [editingType])
+    }, [editingType.birthday])
+
+    const contextOnPress = useCallback((key: number, typeInfo: string) => {
+        setEditingType(prev=>({
+            ...prev,
+            [typeInfo]: {
+                ...prev[typeInfo],
+                id: key,
+                isEditing: true
+            }
+        }))
+    }, [])
 
     const onDone = useCallback(() => {
         let toastConfig: ToastShowParams = {
@@ -182,7 +251,7 @@ const AddItemContact = ({ navigation }) => {
             visibilityTime: 1000,
             autoHide: true
         }
-        
+
         if (!isValid.fullName) {
             Toast.show({
                 ...toastConfig,
@@ -196,137 +265,142 @@ const AddItemContact = ({ navigation }) => {
                 type: "error"
             })
         } else {
-            dispatch(updateContactAction({
-                ...params,
+            let submit = {
                 id: moment().valueOf().toString(),
-                fullName: params.firstName + params.lastName
-            }))
-            console.log(params)
+                avatar: params.avatar,
+                fullName: params.firstName + params.lastName,
+                organization: params.organization,
+                phones: params.phones.filter(item => item.trim() != ""),
+                emails: params.emails.filter(item => item.trim() != ""),
+                addresses: params.addresses.filter(item => item.trim() != ""),
+                birthday: params.birthday
+            }
+            dispatch(updateContactAction(submit))
+            console.log(submit)
             setSubmitted(!isSubmitted)
-            // navigation.navigate("Contact")
+            navigation.navigate("Contact")
         }
-        
+
     }, [isValid, params])
 
     const editingInfoRender = useCallback((typeInfo) => {
-        const {isEditing, count, id, type, typeKeyboard} = editingType
+        const { isEditing, count, id, typeKeyboard } = editingType[typeInfo]
         const list = params[typeInfo]
-        return (typeInfo == editingType.type 
-            ? Array(count).fill(0)
-            :params[typeInfo])
-        .map((x: any, key: number) => {
-            return (
-                <EditSection key={key}>
-                    <DeleteBtn onPress={() => infoDeleteOnPress(key, typeInfo)}>
-                        <DeleteIc source={IC_REDDELETE} />
-                    </DeleteBtn>
-                    {isEditing && typeKeyboard == "datePicker" ? dialogModalRender(key)
-                    : isEditing && id == key && type == typeInfo ? (
-                        <EditTextInput
-                            autoFocus={true}
-                            keyboardType={typeKeyboard}
-                            placeholder={`add ${typeInfo}`}
-                            value={list[key]}
-                            onChangeText={(text) => infoOnChange(key, text, typeInfo)}
-                        />
-                    ) : (
-                        <ContextButton onPress={() => setEditingType({ ...editingType, id: key, isEditing: true })}>
-                            <ContextText>{typeInfo == "birthday" ? moment(list[key]).format("Do MMM YYYY") : list[key]}</ContextText>
-                        </ContextButton>
-                    )}
-                </EditSection>
-            )
-        })
-    }, [editingType, params.birthday])
+        return Array(count).fill(0)
+            .map((x: any, key: number) => {
+                return (
+                    <EditSection key={key}>
+                        <DeleteBtn onPress={() => infoDeleteOnPress(key, typeInfo)}>
+                            <DeleteIc source={IC_REDDELETE} />
+                        </DeleteBtn>
+                        {isEditing && typeInfo == "birthday" ? dialogModalRender(key)
+                            : (isEditing && id == key) || list[key] == "" ? (
+                                <EditTextInput
+                                    ref={view => ref[typeInfo] = view}
+                                    autoFocus={true}
+                                    keyboardType={typeKeyboard}
+                                    placeholder={`add ${typeInfo}`}
+                                    value={list[key]}
+                                    onFocus={() => contextOnPress(key, typeInfo)}
+                                    onChangeText={(text) => infoOnChange(key, text, typeInfo)}
+                                />
+                            ) : (
+                                <ContextButton onPress={() => contextOnPress(key, typeInfo)}>
+                                    <ContextText>{typeInfo == "birthday" ? moment(list[key]).format("Do MMM YYYY") : list[key]}</ContextText>
+                                </ContextButton>
+                            )}
+                    </EditSection>
+                )
+            })
+    }, [editingType])
 
-    
+
 
     return (
         <>
-        <View style={{
-            backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
-        }}>
-        </View>
-        <Container>
-            <HeaderSection>
-                <CancelBtn onPress={() => restoreState()}>
-                    <CancelText>Cancel</CancelText>
-                </CancelBtn>
-                <DoneBtn onPress={onDone}>
-                    <DoneText isValid={isValid}>Done</DoneText>
-                </DoneBtn>
-            </HeaderSection>
-            <ProfileImgSection>
-                <ProfileImg 
+            <View style={{
+                backgroundColor: "#FFFFFF",
+                height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight + 16,
+            }}>
+            </View>
+            <Container>
+                <HeaderSection>
+                    <CancelBtn onPress={() => restoreState()}>
+                        <CancelText>Cancel</CancelText>
+                    </CancelBtn>
+                    <DoneBtn onPress={onDone}>
+                        <DoneText isValid={isValid}>Done</DoneText>
+                    </DoneBtn>
+                </HeaderSection>
+                <ProfileImgSection>
+                    <ProfileImg
                         source={params.avatar ? { uri: params.avatar } : IMG_DEFAULTPROFILE}
-                        style={params.avatar && {width: 100, height: 100}}
-                />
-                <CamBtn onPress={camOnPress}>
-                    <CamIcon source={IC_EDITPROFILEIMG} />
-                </CamBtn>
-                
-            </ProfileImgSection>
-            <SurnameSection>
-                <SurnameInput
-                    autoFocus={true}
-                    value={params.firstName}
-                    onChangeText={(text) => profileInfoOnChange("firstName", text)} 
-                    placeholder="First name"/>
-            </SurnameSection>
-            <LastnameSection>
-                <LastnameInput
-                    value={params.lastName}
-                    onChangeText={(text) => profileInfoOnChange("lastName", text)} 
-                    placeholder="Last name"/>
-            </LastnameSection>
-            <OrganizationSection>
-                <OrganizationInput
-                    value={params.organization}
-                    onChangeText={(text) => profileInfoOnChange("organization", text)}
-                    placeholder="Organization"/>
-            </OrganizationSection>
-            <AddSection>
-                {editingInfoRender("phones")}
-                <AddGroup>
-                    <AddBtn onPress={() => addInfoOnPress("phones", "numeric")}>
-                        <AddIc source={IC_GREENADD} />
-                    </AddBtn>
-                    <AddText>Add phone number</AddText>
-                </AddGroup>
-            </AddSection>
-            <AddSection>
-                {editingInfoRender("emails")}
-                <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("emails", "email-address")}>
-                        <AddIc source={IC_GREENADD} />
-                    </AddBtn>
-                    <AddText>Add email</AddText>
-                </AddGroup>
-            </AddSection>
-            <AddSection>
-                {editingInfoRender("addresses")}
-                <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("addresses", "default")}>
-                        <AddIc source={IC_GREENADD} />
-                    </AddBtn>
-                    <AddText>Add address</AddText>
-                </AddGroup>
-            </AddSection>
-                <AddSection style={{ borderBottomWidth: params.birthday.length == 0 ? 0.5:0}}>
-                {editingInfoRender("birthday")}
-                {params.birthday.length == 0 ? (
+                        style={params.avatar && { width: 100, height: 100 }}
+                    />
+                    <CamBtn onPress={camOnPress}>
+                        <CamIcon source={IC_EDITPROFILEIMG} />
+                    </CamBtn>
+
+                </ProfileImgSection>
+                <SurnameSection>
+                    <SurnameInput
+                        value={params.firstName}
+                        onChangeText={(text) => profileInfoOnChange("firstName", text)}
+                        placeholder="First name" />
+                </SurnameSection>
+                <LastnameSection>
+                    <LastnameInput
+                        value={params.lastName}
+                        onChangeText={(text) => profileInfoOnChange("lastName", text)}
+                        placeholder="Last name" />
+                </LastnameSection>
+                <OrganizationSection>
+                    <OrganizationInput
+                        value={params.organization}
+                        onChangeText={(text) => profileInfoOnChange("organization", text)}
+                        placeholder="Organization" />
+                </OrganizationSection>
+                <AddSection>
+                    {editingInfoRender("phones")}
                     <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("birthday", "datePicker")}>
+                        <AddBtn onPress={() => addInfoOnPress("phones")}>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
-                        <AddText>Add birthday</AddText>
+                        <AddText>Add phone number</AddText>
                     </AddGroup>
-                ):null}
-                
-            </AddSection>
-        </Container>
-        <Toast config={toastConfig}/>
+                </AddSection>
+                <AddSection>
+                    {editingInfoRender("emails")}
+                    <AddGroup>
+                        <AddBtn onPress={() => addInfoOnPress("emails")}>
+                            <AddIc source={IC_GREENADD} />
+                        </AddBtn>
+                        <AddText>Add email</AddText>
+                    </AddGroup>
+                </AddSection>
+                <AddSection>
+                    {editingInfoRender("addresses")}
+                    <AddGroup>
+                        <AddBtn onPress={() => addInfoOnPress("addresses")}>
+                            <AddIc source={IC_GREENADD} />
+                        </AddBtn>
+                        <AddText>Add address</AddText>
+                    </AddGroup>
+                </AddSection>
+                <AddSection style={{ borderBottomWidth: params.birthday.length == 0 ? 0.5 : 0 }}>
+                    {editingInfoRender("birthday")}
+                    {params.birthday.length == 0 ? (
+                        <AddGroup>
+                            <AddBtn onPress={() => addInfoOnPress("birthday")}>
+                                <AddIc source={IC_GREENADD} />
+                            </AddBtn>
+                            <AddText>Add birthday</AddText>
+                        </AddGroup>
+                    ) : null}
+
+                </AddSection>
+            </Container>
+            <Toast config={toastConfig} />
         </>
     )
 }
@@ -360,7 +434,7 @@ const CancelText = styled.Text`
 const DoneBtn = styled.TouchableOpacity`
     
 `
-const DoneText = styled.Text<{isValid?:{fullName: boolean, phone:boolean}}>`
+const DoneText = styled.Text<{ isValid?: { fullName: boolean, phone: boolean } }>`
     font-weight: 400;
     font-size: 18px;
     line-height: 22px;
@@ -371,7 +445,7 @@ const DoneText = styled.Text<{isValid?:{fullName: boolean, phone:boolean}}>`
 
     /* Gray 3 */
 
-    color: ${(props) => props.isValid.fullName && props.isValid.phone ? '#F2A54A' :'#828282'} ;
+    color: ${(props) => props.isValid.fullName && props.isValid.phone ? '#F2A54A' : '#828282'} ;
 `
 const ProfileImgSection = styled.View`
     margin-top: 12px;

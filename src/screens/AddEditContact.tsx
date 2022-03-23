@@ -24,16 +24,35 @@ const AddItemContact = ({ navigation }) => {
         birthday: []
     })
     const [editingType, setEditingType] = useState({
-        type: "",
-        typeKeyboard: "default",
-        isEditing: false,
-        id: -1,
-        count: 0
+        phones: {
+            typeKeyboard: "numeric",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        emails: {
+            typeKeyboard: "email-address",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        addresses: {
+            typeKeyboard: "default",
+            isEditing: false,
+            id: -1,
+            count: 0
+        },
+        birthday: {
+            typeKeyboard: "datePicker",
+            isEditing: false,
+            id: -1,
+            count: 0
+        }
     })
     const [isSubmitted, setSubmitted] = useState(false)
     const [isValid, setIsValid] = useState({ fullName: false, phone: false })
     const dispatch = useDispatch()
-
+    let ref = useRef<any>({}).current
 
     useEffect(() => {
         setParams({
@@ -47,20 +66,39 @@ const AddItemContact = ({ navigation }) => {
             birthday: []
         })
         setEditingType({
-            type: "",
-            typeKeyboard: "default",
-            isEditing: false,
-            id: -1,
-            count: 0
+            phones: {
+                typeKeyboard: "numeric",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            emails: {
+                typeKeyboard: "email-address",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            addresses: {
+                typeKeyboard: "default",
+                isEditing: false,
+                id: -1,
+                count: 0
+            },
+            birthday: {
+                typeKeyboard: "datePicker",
+                isEditing: false,
+                id: -1,
+                count: 0
+            }
         })
     }, [isSubmitted])
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
-            isValidPhone = !!params.phones.filter(item=>item.trim()!="").length
+            isValidPhone = !!params.phones.filter(item => item.trim() != "").length
 
         setIsValid({ fullName: isValidName, phone: isValidPhone })
-        
+
     }, [JSON.stringify(params)])
 
     const restoreState = useCallback(() => {
@@ -91,9 +129,11 @@ const AddItemContact = ({ navigation }) => {
             newList.splice(key, 1)
             setEditingType(editingPrev => ({
                 ...editingPrev,
-                type: typeInfo,
-                count: newList.length,
-                id: newList.indexOf("")
+                [typeInfo]: {
+                    ...editingPrev[typeInfo],
+                    count: newList.length,
+                    id: newList.indexOf("")
+                }
             }))
             return {
                 ...prev,
@@ -113,31 +153,41 @@ const AddItemContact = ({ navigation }) => {
         })
     }, [params])
 
-    const addInfoOnPress = useCallback((typeInfo: string, typeKeyboard: string) => {
+    const addInfoOnPress = useCallback((typeInfo: string) => {
         setParams(prev => {
-            let newList = prev[typeInfo].filter(item => item.trim() != "")
+            let newList = prev[typeInfo].map(item => item.trim())
             let newCount = newList.length
-            setEditingType({
-                typeKeyboard,
-                type: typeInfo,
-                count: newCount + 1,
-                isEditing: true,
-                id: newCount
-            })
+            if (typeInfo == "birthday") {
+                newCount = 1
+            } else if (newList.indexOf("") == -1) {
+                newList.push("")
+                newCount = newList.length
+            }
+
+            setEditingType(editPrev => ({
+                ...editPrev,
+                [typeInfo]: {
+                    ...editPrev[typeInfo],
+                    count: newCount,
+                    id: newList.indexOf(""),
+                    isEditing: true
+                }
+            }))
             return {
                 ...prev,
-                phones: prev.phones.filter(item => item.trim() != ""),
-                emails: prev.emails.filter(item => item.trim() != ""),
-                addresses: prev.addresses.filter(item => item.trim() != "")
+                [typeInfo]: newList
             }
         })
-    }, [editingType])
+        ref[typeInfo]?.focus()
+    }, [])
 
     const onDateConfirm = useCallback((date, key) => {
         setEditingType(prev => ({
             ...prev,
-            type: "birthday",
-            isEditing: false
+            birthday: {
+                ...prev.birthday,
+                isEditing: false
+            }
         }))
         setParams(prev => {
             let newList = prev.birthday
@@ -147,38 +197,53 @@ const AddItemContact = ({ navigation }) => {
                 birthday: newList
             }
         })
-    }, [editingType.count])
+    }, [editingType.birthday])
 
     const onDateCancel = useCallback(() => {
         setEditingType(prev => {
-            if (prev.count == 1 && params.birthday.length == 1) {
+            if (prev.birthday.count == 1 && params.birthday.length == 1) {
                 return {
                     ...prev,
-                    type: "birthday",
-                    isEditing: false
+                    birthday: {
+                        ...prev.birthday,
+                        isEditing: false
+                    }
                 }
             } else {
                 return {
                     ...prev,
-                    type: "birthday",
-                    count: prev.count - 1,
-                    isEditing: false
+                    birthday: {
+                        ...prev.birthday,
+                        count: prev.birthday.count - 1,
+                        isEditing: false
+                    }
                 }
             }
         })
-    }, [editingType])
+    }, [editingType.birthday])
 
     const dialogModalRender = useCallback((key) => {
         return (
             <DateTimePickerModal
                 date={moment(params.birthday[key]).toDate()}
-                isVisible={editingType.isEditing && editingType.type == "birthday"}
+                isVisible={editingType.birthday.isEditing}
                 mode="date"
                 onConfirm={(date) => onDateConfirm(date, key)}
                 onCancel={() => onDateCancel()}
             />
         )
-    }, [editingType])
+    }, [editingType.birthday])
+
+    const contextOnPress = useCallback((key: number, typeInfo: string) => {
+        setEditingType(prev => ({
+            ...prev,
+            [typeInfo]: {
+                ...prev[typeInfo],
+                id: key,
+                isEditing: true
+            }
+        }))
+    }, [])
 
     const onDone = useCallback(() => {
         let toastConfig: ToastShowParams = {
@@ -201,12 +266,14 @@ const AddItemContact = ({ navigation }) => {
             })
         } else {
             let submit = {
-                ...params,
                 id: moment().valueOf().toString(),
+                avatar: params.avatar,
                 fullName: params.firstName + params.lastName,
+                organization: params.organization,
                 phones: params.phones.filter(item => item.trim() != ""),
                 emails: params.emails.filter(item => item.trim() != ""),
-                addresses: params.addresses.filter(item => item.trim() != "")
+                addresses: params.addresses.filter(item => item.trim() != ""),
+                birthday: params.birthday
             }
             dispatch(updateContactAction(submit))
             console.log(submit)
@@ -217,35 +284,35 @@ const AddItemContact = ({ navigation }) => {
     }, [isValid, params])
 
     const editingInfoRender = useCallback((typeInfo) => {
-        const { isEditing, count, id, type, typeKeyboard } = editingType
+        const { isEditing, count, id, typeKeyboard } = editingType[typeInfo]
         const list = params[typeInfo]
-        return (typeInfo == editingType.type
-            ? Array(count).fill(0)
-            : params[typeInfo])
+        return Array(count).fill(0)
             .map((x: any, key: number) => {
                 return (
                     <EditSection key={key}>
                         <DeleteBtn onPress={() => infoDeleteOnPress(key, typeInfo)}>
                             <DeleteIc source={IC_REDDELETE} />
                         </DeleteBtn>
-                        {isEditing && typeKeyboard == "datePicker" ? dialogModalRender(key)
-                            : isEditing && id == key && type == typeInfo ? (
+                        {isEditing && typeInfo == "birthday" ? dialogModalRender(key)
+                            : (isEditing && id == key) || list[key] == "" ? (
                                 <EditTextInput
+                                    ref={view => ref[typeInfo] = view}
                                     autoFocus={true}
                                     keyboardType={typeKeyboard}
                                     placeholder={`add ${typeInfo}`}
                                     value={list[key]}
+                                    onFocus={() => contextOnPress(key, typeInfo)}
                                     onChangeText={(text) => infoOnChange(key, text, typeInfo)}
                                 />
                             ) : (
-                                <ContextButton onPress={() => setEditingType({ ...editingType, id: key, isEditing: true, type: typeInfo })}>
+                                <ContextButton onPress={() => contextOnPress(key, typeInfo)}>
                                     <ContextText>{typeInfo == "birthday" ? moment(list[key]).format("Do MMM YYYY") : list[key]}</ContextText>
                                 </ContextButton>
                             )}
                     </EditSection>
                 )
             })
-    }, [editingType, params.birthday])
+    }, [editingType])
 
 
 
@@ -256,15 +323,16 @@ const AddItemContact = ({ navigation }) => {
                 height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight + 16,
             }}>
             </View>
+            <HeaderSection>
+                <CancelBtn onPress={() => restoreState()}>
+                    <CancelText>Cancel</CancelText>
+                </CancelBtn>
+                <DoneBtn onPress={onDone}>
+                    <DoneText isValid={isValid}>Done</DoneText>
+                </DoneBtn>
+            </HeaderSection>
             <Container>
-                <HeaderSection>
-                    <CancelBtn onPress={() => restoreState()}>
-                        <CancelText>Cancel</CancelText>
-                    </CancelBtn>
-                    <DoneBtn onPress={onDone}>
-                        <DoneText isValid={isValid}>Done</DoneText>
-                    </DoneBtn>
-                </HeaderSection>
+                
                 <ProfileImgSection>
                     <ProfileImg
                         source={params.avatar ? { uri: params.avatar } : IMG_DEFAULTPROFILE}
@@ -277,7 +345,6 @@ const AddItemContact = ({ navigation }) => {
                 </ProfileImgSection>
                 <SurnameSection>
                     <SurnameInput
-                        autoFocus={true}
                         value={params.firstName}
                         onChangeText={(text) => profileInfoOnChange("firstName", text)}
                         placeholder="First name" />
@@ -297,7 +364,7 @@ const AddItemContact = ({ navigation }) => {
                 <AddSection>
                     {editingInfoRender("phones")}
                     <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("phones", "numeric")}>
+                        <AddBtn onPress={() => addInfoOnPress("phones")}>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add phone number</AddText>
@@ -306,7 +373,7 @@ const AddItemContact = ({ navigation }) => {
                 <AddSection>
                     {editingInfoRender("emails")}
                     <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("emails", "email-address")}>
+                        <AddBtn onPress={() => addInfoOnPress("emails")}>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add email</AddText>
@@ -315,7 +382,7 @@ const AddItemContact = ({ navigation }) => {
                 <AddSection>
                     {editingInfoRender("addresses")}
                     <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("addresses", "default")}>
+                        <AddBtn onPress={() => addInfoOnPress("addresses")}>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add address</AddText>
@@ -325,7 +392,7 @@ const AddItemContact = ({ navigation }) => {
                     {editingInfoRender("birthday")}
                     {params.birthday.length == 0 ? (
                         <AddGroup>
-                            <AddBtn onPress={() => addInfoOnPress("birthday", "datePicker")}>
+                            <AddBtn onPress={() => addInfoOnPress("birthday")}>
                                 <AddIc source={IC_GREENADD} />
                             </AddBtn>
                             <AddText>Add birthday</AddText>
@@ -344,10 +411,12 @@ export default memo(AddItemContact)
 const Container = styled.ScrollView`
     background-color: #FFFFFF;
     display: flex;
-    height: 100%;
+    flex: auto;
     padding: 0px 16px;
 `
 const HeaderSection = styled.View`
+background-color: #FFFFFF;
+    padding: 0px 16px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
