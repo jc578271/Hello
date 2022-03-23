@@ -275,7 +275,9 @@ const AddItemContact = ({ navigation }) => {
                 addresses: params.addresses.filter(item => item.trim() != ""),
                 birthday: params.birthday
             }
-            dispatch(updateContactAction(submit))
+            dispatch(updateContactAction(submit)).then(() => {
+                console.log("done")
+            })
             console.log(submit)
             setSubmitted(!isSubmitted)
             navigation.navigate("Contact")
