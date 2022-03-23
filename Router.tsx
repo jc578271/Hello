@@ -20,7 +20,7 @@ const Drawer = createDrawerNavigator()
 const TabStack = ({ route, navigation }:any) => {
     return(
         <Tab.Navigator
-            initialRouteName="Home"
+            initialRouteName="Contact"
             screenOptions={{header: props=><Header navigation={navigation} {...props} />}}
             tabBar={props=><Footer {...props} />}
         >

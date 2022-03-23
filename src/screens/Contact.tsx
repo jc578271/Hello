@@ -1,28 +1,29 @@
-import React, {memo, useEffect, useState} from "react";
+import React, {memo, useCallback, useEffect, useState} from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import styled from "styled-components/native";
 import { IC_SEARCH, IMG_PROFILE } from '../assets'
-import { contactDB } from '../assets/dummydb/db'
+import { useContacts } from "../store";
 import { groupedData, filterData } from "../utils/helper";
 
 const Contact = ({ route, navigation }:any) => {
     const chars = ['Digit',
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    const [db, setDb] = useState<any[]>([])
+    const [groupedContact, setGroupedContact] = useState({})
     const [isMounted, setMounted] = useState(false)
     const [searchInput, setSearchInput] = useState('')
     const [posYs, setPosYs] = useState<any>({"Digit": 0})
     const [scrollRef, setScrollRef] = useState<ScrollView|null>(null)
+    const contacts = useContacts()
 
     useEffect(() => {
         setMounted(true)
-        console.log("hello")
     }, [])
         
     useEffect(() => {
-        setDb(filterData(searchInput, contactDB))
-    }, [isMounted, searchInput])
+        let db = filterData(searchInput, contacts)
+        setGroupedContact(groupedData(db))
+    }, [isMounted, searchInput, contacts, JSON.stringify(groupedContact)])
     
 
     const onChangePosYs = (e: LayoutChangeEvent, char: string) => {
@@ -31,30 +32,32 @@ const Contact = ({ route, navigation }:any) => {
         setPosYs(newPosYs)
     }
 
-    const groupByCharRender = (char:string, db: any[]) => (
-        <View>
-            <CharSection>
-                <BgCharSection></BgCharSection>
-                <CharText>{char}</CharText>
-            </CharSection>
-            <ItemsSection>
-                {groupedData(char, db).map(({ id, name, number }, key) => {
-                    return <View key={key}>{itemRender({ id, name, number }, key)}</View>
-                })}
-            </ItemsSection>
-        </View>
-    )
+    const groupByCharRender = useCallback(() => {
+        return Object.keys(groupedContact).map((char, key) => groupedContact[char]?.length && (
+            <View onLayout={e => onChangePosYs(e, char)} key={key}>
+                <CharSection>
+                    <BgCharSection></BgCharSection>
+                    <CharText>{char}</CharText>
+                </CharSection>
+                <ItemsSection>
+                    {groupedContact[char].map(({ id, fullName, phones }, index) => (
+                        <View key={index}>{itemRender({ id, fullName, phones }, index)}</View>
+                    ))}
+                </ItemsSection>
+            </View>
+        ))
+    }, [JSON.stringify(groupedContact)])
 
-    const itemOnPress = (item: {id:string, name: string, number: string}) => {
-        navigation.navigate('ItemContact', item)
+    const itemOnPress = (id: string) => {
+        navigation.navigate('ItemContact', { id })
     }
 
-    const itemRender = ({ id, name, number }:any, key: number) => (
-        <Item key={key} onPress={() => itemOnPress({ id, name, number })}>
+    const itemRender = ({ id, fullName, phones }:any, key: number) => (
+        <Item key={key} onPress={() => itemOnPress(id)}>
             <ProfileImg source={IMG_PROFILE} />
             <InfoSection style={{borderTopWidth: key==0?0:0.5}}>
-                <ProfileName>{name}</ProfileName>
-                <ProfileNumber>{number}</ProfileNumber>
+                <ProfileName>{fullName}</ProfileName>
+                <ProfileNumber>{phones[0]}</ProfileNumber>
             </InfoSection>
         </Item>
     )
@@ -71,13 +74,7 @@ const Contact = ({ route, navigation }:any) => {
                 />
             </SearchSection>
             <ScrollContent ref={view => setScrollRef(view)}>
-                {chars.map((char, key) => {
-                    return groupedData(char, db).length >0
-                    ? <View onLayout={e => onChangePosYs(e, char)} key={key}>
-                        {groupByCharRender(char, db)}
-                    </View>
-                    : null
-                })}
+                {groupByCharRender()}
                 <Sth></Sth>
             </ScrollContent>
             <SideCharSection>
@@ -101,6 +98,7 @@ export default memo(Contact)
 
 const Container =  styled.View`
     display: flex;
+    flex:auto;
     background-color: #FFFFFF;
 `
 const SearchSection = styled.View`
@@ -184,7 +182,7 @@ const ProfileNumber = styled.Text`
     color: #828282;
 `
 const Sth = styled.View`
-    height: 110px;
+    height: 70px;
 `
 const SideCharSection = styled.View`
     position: absolute;

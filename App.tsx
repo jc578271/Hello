@@ -11,6 +11,8 @@ import React from 'react';
 import type {Node} from 'react';
 import Router from './Router';
 import { LogBox } from 'react-native';
+import { Provider } from 'react-redux';
+import { store } from './src/store';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you\'re using an old API with gesture components, check out new Gestures system!",
@@ -19,7 +21,9 @@ LogBox.ignoreLogs([
 
 const App: () => Node = () => {
   return (
-    <Router />
+    <Provider store={store}>
+      <Router />
+    </Provider>
   )
 };
 export default App;

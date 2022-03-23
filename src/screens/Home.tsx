@@ -1,5 +1,6 @@
 import React, {memo} from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, View, StatusBar, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native"
 import { IC_LOGO, IMG_HOMEBG, IC_SMALLLOGO } from "../assets";
 
@@ -9,11 +10,18 @@ interface Props {
 const screenHeigth = Dimensions.get("window").height
 
 const Home = ({ navigation }: Props) => {
+    const insets = useSafeAreaInsets()
     return (
+        <>
+        <View style={{
+            backgroundColor: "#FFFFFF",
+            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
+        }}>
+        </View>
         <Container>
             <Section1>
-                <HomeBg source={IMG_HOMEBG} />
-                <LogoAppIcon source={IC_LOGO}/>
+                <HomeBg resizeMode="contain" source={IMG_HOMEBG} />
+                <LogoAppIcon source={IC_LOGO} />
             </Section1>
             <Section2>
                 <Title>Base wework</Title>
@@ -34,6 +42,8 @@ const Home = ({ navigation }: Props) => {
                 </ManualLoginBtn>
             </Section3>
         </Container>
+        </>
+        
     )
 }
 
@@ -42,7 +52,7 @@ export default memo(Home)
 const Container = styled.View`
     background-color: #FFFFFF;
     display: flex;
-    height: 100%;
+    flex:auto;
 `
 
 const Section1 = styled.View`
@@ -51,6 +61,7 @@ const Section1 = styled.View`
 
 const LogoAppIcon = styled.Image`
     margin-top: 50px;
+    margin-bottom: 40px;
     width: 200px;
     height: 200px;
 
@@ -59,6 +70,7 @@ const HomeBg = styled.Image`
     position: absolute;
     bottom: 0;
     left: 0;
+    right: 0;
     z-index: -1;
 `
 const Section2 = styled.View`

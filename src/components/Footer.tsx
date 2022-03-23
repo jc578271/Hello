@@ -19,13 +19,12 @@ const Footer = ({ state, descriptors, navigation }: any) => {
         const isFocused = state.index == index
         return (
             <WrapItem>
-                <ItemBtn
-                onPress={() => navigation.navigate(title)}>
+                <ItemBtn onPress={() => navigation.navigate(title)}>
                     <ItemImg 
+                        isFocused={isFocused}
                         resizeMode="cover" source={labelIcons[title][0]}
-                        style={{tintColor: isFocused ? 'white' : '#DADADA'}}
                     />
-                    <ItemText style={{color: isFocused ? 'white' : '#DADADA'}}>
+                    <ItemText isFocused={isFocused}>
                         {labelIcons[title][1]}
                     </ItemText>
                 </ItemBtn>
@@ -35,7 +34,7 @@ const Footer = ({ state, descriptors, navigation }: any) => {
     const contactRoute = state.routes[0]
     const historyRoute = state.routes[1]
     
-    if (state.index < 2) {
+    if (state.index < 3) {
         return (
             <>
             <Container>
@@ -51,7 +50,7 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             </Container>
             <View style={{
                 backgroundColor: '#F2A54A',
-                height: Platform.OS == "ios" ? insets.bottom : 10}}></View>
+                height: Platform.OS == "ios" ? insets.bottom+10 : 10}}></View>
             </>
         )
     } else {
@@ -108,15 +107,17 @@ const NavBg = styled.Image`
     position: absolute;
     bottom: 0;
 `
-const ItemImg = styled.Image`
+const ItemImg = styled.Image<{isFocused?:boolean}>`
     width: 30px;
     height: 30px;
     margin: auto;
+    tint-color:${props => props.isFocused ? 'white' : '#DADADA'};
 `
-const ItemText = styled.Text`
+const ItemText = styled.Text<{isFocused?:boolean}>`
     font-weight: 400;
     font-size: 10px;
     line-height: 12px;
     text-align: center;
     margin-top: 4px;
+    color: ${props => props.isFocused ? 'white' : '#DADADA'};
 `
