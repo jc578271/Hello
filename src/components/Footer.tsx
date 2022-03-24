@@ -40,7 +40,7 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             <Container>
                 <WrapBtn>
                     <NavBg source={IMG_NAVBG} />
-                    <AddBtn onPress={() => navigation.navigate('AddEditContact')}>
+                    <AddBtn onPress={() => navigation.navigate('AddContact')}>
                         <AddImg resizeMode="contain" source={IC_ADDBTN} />
                     </AddBtn>
                 </WrapBtn>

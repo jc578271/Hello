@@ -1,11 +1,64 @@
-import React, { memo } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Platform, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDispatch } from "react-redux";
 import styled from "styled-components/native";
-import { IC_BACK, IC_CALL, IC_EDITPROFILEIMG, IMG_PROFILE } from "../assets";
+import { IC_BACK, IC_CALL, IC_EDITPROFILEIMG, IMG_PROFILE, IMG_DEFAULTPROFILE, IC_MESSAGE, IC_FACETIME, IC_EMAIL } from "../assets";
+import { deleteContactAction, useContacts } from "../store";
+import { RawContact } from "../types";
 
-const ItemContact = ({ navigation }) => {
+const featureItems = [
+    { icon: IC_CALL, text: "Call", typeInfo: "phones"},
+    { icon: IC_MESSAGE, text: "Message",typeInfo: "phones"},
+    { icon: IC_FACETIME, text: "Call", typeInfo: "phones"},
+    { icon: IC_EMAIL, text: "Email", typeInfo: "emails" },
+]
+
+const FeatureItem = ({ icon, text, available }:{icon:any, text: string, available: boolean}) => (
+    <ItemFeature>
+        <ItemFeatureIcBg available={available}>
+            <ItemFeatureIc available={available} text={text} source={icon} />
+        </ItemFeatureIcBg>
+        <ItemFeatureText>{text}</ItemFeatureText>
+    </ItemFeature>
+)
+
+const ItemContact = ({ navigation, route }) => {
     const insets = useSafeAreaInsets()
+    const contacts = useContacts()
+    const dispatch = useDispatch()
+    const [itemContact, setItemContact] = useState<RawContact>({
+        id: "",
+        firstName: "",
+        lastName: "",
+        organization: "",
+        phones: [],
+        emails: [],
+        addresses: [],
+        birthday: [],
+        avatar: "",
+    })
+    const [isMounted, setMounted] = useState(false)
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (isMounted) {
+            setItemContact(contacts.find(item => item?.id == route.params?.id))
+        }
+    }, [contacts, JSON.stringify(itemContact), route.params.id, isMounted])
+
+    const deleteMessage = useCallback(() => {
+        navigation.navigate("Contact")
+        dispatch(deleteContactAction(itemContact?.id))
+    }, [JSON.stringify(itemContact)])
+
+    const onEditPress = useCallback(() => {
+        console.log(itemContact.id)
+        navigation.navigate("EditContact", { id: itemContact.id })
+    }, [JSON.stringify(itemContact)])
+
     return (
         <>
         <View style={{
@@ -21,48 +74,33 @@ const ItemContact = ({ navigation }) => {
                     <BackBtn onPress={() => navigation.goBack()}>
                         <BackIc source={IC_BACK} />
                     </BackBtn>
-                    <EditBtn>
+                    <EditBtn onPress={onEditPress}>
                         <EditText>Edit</EditText>
                     </EditBtn>
                 </HeaderSection>
                 <InfoSection>
                     <ProfileImgSection>
-                        <ProfileImg source={IMG_PROFILE} />
+                        <ProfileImg 
+                            source={itemContact?.avatar ? { uri: itemContact.avatar } : IMG_DEFAULTPROFILE}
+                            style={itemContact?.avatar && { width: 100, height: 100 }} />
                         <CamIcon source={IC_EDITPROFILEIMG} />
                     </ProfileImgSection>
-                    <ProfileText>Nguyen Le Hoang</ProfileText>
-                    <ProfileSubText>Mobile Dev</ProfileSubText>
+                    <ProfileText>{itemContact?.firstName} {itemContact?.lastName}</ProfileText>
+                        <ProfileSubText>{itemContact?.organization}</ProfileSubText>
                 </InfoSection>
                 <FeatureSection>
-                    <ItemFeature>
-                        <ItemFeatureIcBg>
-                            <ItemFeatureIc source={IC_CALL}/>
-                        </ItemFeatureIcBg>
-                        <ItemFeatureText>Call</ItemFeatureText>
-                    </ItemFeature>
-                    <ItemFeature>
-                        <ItemFeatureIcBg>
-                            <ItemFeatureIc source={IC_CALL}/>
-                        </ItemFeatureIcBg>
-                        <ItemFeatureText>Call</ItemFeatureText>
-                    </ItemFeature>
-                    <ItemFeature>
-                        <ItemFeatureIcBg>
-                            <ItemFeatureIc source={IC_CALL}/>
-                        </ItemFeatureIcBg>
-                        <ItemFeatureText>Call</ItemFeatureText>
-                    </ItemFeature>
-                    <ItemFeature>
-                        <ItemFeatureIcBg>
-                            <ItemFeatureIc source={IC_CALL}/>
-                        </ItemFeatureIcBg>
-                        <ItemFeatureText>Call</ItemFeatureText>
-                    </ItemFeature>
+                    {featureItems.map((item, key) => (
+                        <FeatureItem
+                            available={itemContact[item.typeInfo]?.length}
+                            icon={item.icon} text={item.text}
+                            key={key} 
+                        />
+                    ))}
                 </FeatureSection>
             </Section1>
             <PhoneSection>
                 <PhoneTitle>Phone number</PhoneTitle>
-                <PhoneNumber>0123456789</PhoneNumber>
+                <PhoneNumber>{itemContact?.phones[0]}</PhoneNumber>
             </PhoneSection>
             <NoteSection>
                 <NoteTitle>Note</NoteTitle>
@@ -72,7 +110,7 @@ const ItemContact = ({ navigation }) => {
                 <SendMessageText>Send message</SendMessageText>
             </SendMessageBtn>
             <DeleteBtn>
-                <DeleteText>Delete Contact</DeleteText>
+                <DeleteText onPress={deleteMessage}>Delete Contact</DeleteText>
             </DeleteBtn>
         </Container>
         </>
@@ -111,7 +149,7 @@ const BackBtn = styled.TouchableOpacity`
 const BackIc = styled.Image`
     
 `
-const EditBtn = styled.View`
+const EditBtn = styled.TouchableOpacity`
     
 `
 const EditText = styled.Text`
@@ -131,10 +169,17 @@ const InfoSection = styled.View`
 `
 const ProfileImgSection = styled.View`
     margin-top: 12px;
+    width: 100px;
+    height: 100px;
+    background-color: #F2F2F2;
+    border-radius: 100px;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
 `
 const ProfileImg = styled.Image`
-    height: 100px;
-    width: 100px;
+    height: 80px;
+    width: 80px;
     border-radius: 100px;
 `
 const CamIcon = styled.Image`
@@ -176,14 +221,20 @@ const FeatureSection = styled.View`
 const ItemFeature = styled.TouchableOpacity`
     align-items: center;
 `
-const ItemFeatureIcBg = styled.View`
-    background-color: #F2A54A;
-    padding: 10px;
+const ItemFeatureIcBg = styled.View<{available?:boolean}>`
+    background-color: ${props => props.available ? "#F2A54A" : "#FFFFFF"};
+    border: ${props=>props.available?'0':'0.5px'} solid #BDBDBD;
+    /* padding: 10px; */
+    height: 40px;
+    width: 40px;
+    align-items: center;
+    justify-content: center;
     border-radius: 100px;
 `
-const ItemFeatureIc = styled.Image`
-    height: 18px;
-    width: 18px;
+const ItemFeatureIc = styled.Image<{text?:string, available?:boolean}>`
+    height: ${props => props.text == "Message"? '18px': '24px'};
+    width: ${props => props.text == "Message" ? '18px' : '24px'};
+    tint-color: ${props => props.available ? '#FFFFFF' : '#DADADA;'}
 `
 const ItemFeatureText = styled.Text`
     margin-top: 5px;

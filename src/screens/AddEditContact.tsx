@@ -11,9 +11,10 @@ import { updateContactAction, useContacts } from "../store";
 import { useDispatch } from "react-redux";
 import { toastConfig } from "../components/BaseToast";
 
-const AddItemContact = ({ navigation }) => {
+const AddItemContact = ({ navigation, route }) => {
     const insets = useSafeAreaInsets()
     const [params, setParams] = useState({
+        id: moment().valueOf().toString(),
         firstName: "",
         lastName: "",
         organization: "",
@@ -52,46 +53,39 @@ const AddItemContact = ({ navigation }) => {
     const [isSubmitted, setSubmitted] = useState(false)
     const [isValid, setIsValid] = useState({ fullName: false, phone: false })
     const dispatch = useDispatch()
+    const contacts = useContacts()
+    const [isMounted, setMounted] = useState(false)
     let ref = useRef<any>({}).current
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
-        setParams({
-            firstName: "",
-            lastName: "",
-            organization: "",
-            avatar: "",
-            phones: [],
-            emails: [],
-            addresses: [],
-            birthday: []
-        })
-        setEditingType({
-            phones: {
-                typeKeyboard: "numeric",
-                isEditing: false,
-                id: -1,
-                count: 0
-            },
-            emails: {
-                typeKeyboard: "email-address",
-                isEditing: false,
-                id: -1,
-                count: 0
-            },
-            addresses: {
-                typeKeyboard: "default",
-                isEditing: false,
-                id: -1,
-                count: 0
-            },
-            birthday: {
-                typeKeyboard: "datePicker",
-                isEditing: false,
-                id: -1,
-                count: 0
-            }
-        })
-    }, [isSubmitted])
+        setSubmitted(false)
+        if (isMounted && route.params?.id) {
+            let itemContact = contacts.find(item=>item.id == route.params.id)
+            let {
+                phones,
+                emails,
+                addresses,
+                birthday
+            } = itemContact
+            setParams(prev=> {
+                setEditingType(editPrev=> ({
+                    ...editPrev,
+                    phones: { ...editPrev.phones, count: phones.length },
+                    emails: { ...editPrev.emails, count: emails.length },
+                    addresses: { ...editPrev.addresses, count: addresses.length },
+                    birthday: { ...editPrev.birthday, count: birthday.length },
+                }))
+                return {
+                    ...prev,
+                    ...itemContact
+                }
+            })
+        }
+        
+    }, [isSubmitted, isMounted, route.params])
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
@@ -266,24 +260,23 @@ const AddItemContact = ({ navigation }) => {
             })
         } else {
             let submit = {
-                id: moment().valueOf().toString(),
+                id: params.id,
                 avatar: params.avatar,
-                fullName: params.firstName + params.lastName,
+                firstName: params.firstName,
+                lastName: params.lastName,
                 organization: params.organization,
                 phones: params.phones.filter(item => item.trim() != ""),
                 emails: params.emails.filter(item => item.trim() != ""),
                 addresses: params.addresses.filter(item => item.trim() != ""),
                 birthday: params.birthday
             }
-            dispatch(updateContactAction(submit)).then(() => {
-                console.log("done")
-            })
-            console.log(submit)
-            setSubmitted(!isSubmitted)
+            // @ts-ignore
+            dispatch(updateContactAction(submit))
             navigation.navigate("Contact")
+            console.log(params.id)
         }
 
-    }, [isValid, params])
+    }, [isValid, params, isSubmitted])
 
     const editingInfoRender = useCallback((typeInfo) => {
         const { isEditing, count, id, typeKeyboard } = editingType[typeInfo]

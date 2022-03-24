@@ -2,6 +2,7 @@ import React, {memo} from "react";
 import { Dimensions, View, StatusBar, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native"
+import { NavigationActions } from "react-navigation"
 import { IC_LOGO, IMG_HOMEBG, IC_SMALLLOGO } from "../assets";
 
 interface Props {

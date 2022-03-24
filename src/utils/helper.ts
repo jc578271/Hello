@@ -3,7 +3,8 @@ export const groupedData = (db: RawContact[]) => {
     
     let result = {}
     db.forEach(item => {
-        let words = item.fullName.split(' ')
+        let fullName = item.firstName + item.lastName
+        let words = fullName.split(' ')
         let firstCharOfLastname = words[words.length - 1][0] || ""
         let normalizeChar = nonAccentVietnamese(firstCharOfLastname.toLocaleLowerCase()).toUpperCase()
         let temp = result[normalizeChar]
@@ -16,8 +17,10 @@ export const groupedData = (db: RawContact[]) => {
     })
     let sortedResult = Object.keys(result).sort().reduce((obj, key) => {
         obj[key] = result[key].sort((a, b) => {
-            let aWords = a.fullName.split(' '),
-                bWords = b.fullName.split(' ')
+            let aFullName = a.firstName + a.lastName,
+                bFullName = b.firstName + b.lastName
+            let aWords = aFullName.split(' '),
+                bWords = bFullName.split(' ')
             let aLastname = aWords[aWords.length - 1],
                 bLastname = bWords[bWords.length - 1]
             return aLastname < bLastname ? -1 : 1
@@ -30,10 +33,11 @@ export const groupedData = (db: RawContact[]) => {
 }
 
 export const filterData = (searchInput: string, db: RawContact[]) => {
-    // console.log("helper:", db)
-    return db.filter(({fullName, phones}) => {
-        return phones.some(item => item.trim().toLowerCase().includes(searchInput.trim().toLowerCase()))
-            || fullName.trim().toLowerCase().includes(searchInput.trim().toLowerCase())
+    searchInput = nonAccentVietnamese(searchInput).trim().toLowerCase()
+    return db.filter(({firstName, lastName, phones}) => {
+        let fullName = firstName + lastName
+        return phones.some(item => item.trim().toLowerCase().includes(searchInput))
+        || nonAccentVietnamese(fullName).trim().toLowerCase().includes(searchInput)
     })
 }
 

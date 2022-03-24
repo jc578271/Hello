@@ -1,6 +1,7 @@
 export interface RawContact {
     id: string,
-    fullName: string,
+    firstName: string,
+    lastName: string,
     organization: string,
     phones: string[],
     emails: string[],

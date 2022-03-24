@@ -1,7 +1,7 @@
 import React, {memo, useCallback, useEffect, useState} from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import styled from "styled-components/native";
-import { IC_SEARCH, IMG_PROFILE } from '../assets'
+import { IC_SEARCH, IMG_PROFILE, IMG_DEFAULTPROFILE } from '../assets'
 import { useContacts } from "../store";
 import { groupedData, filterData } from "../utils/helper";
 
@@ -40,9 +40,12 @@ const Contact = ({ route, navigation }:any) => {
                     <CharText>{char}</CharText>
                 </CharSection>
                 <ItemsSection>
-                    {groupedContact[char].map(({ id, fullName, phones }, index) => (
-                        <View key={index}>{itemRender({ id, fullName, phones }, index)}</View>
-                    ))}
+                    {groupedContact[char].map(({ id, firstName, lastName, phones, avatar }, index) => {
+                        let fullName = firstName + lastName
+                        return (
+                        <View key={index}>{itemRender({ id, fullName, phones, avatar }, index)}</View>
+                        )}
+                    )}
                 </ItemsSection>
             </View>
         ))
@@ -52,9 +55,13 @@ const Contact = ({ route, navigation }:any) => {
         navigation.navigate('ItemContact', { id })
     }
 
-    const itemRender = ({ id, fullName, phones }:any, key: number) => (
+    const itemRender = ({ id, fullName, phones, avatar }:any, key: number) => (
         <Item key={key} onPress={() => itemOnPress(id)}>
-            <ProfileImg source={IMG_PROFILE} />
+            <ProfileImgSection>
+                <ProfileImg 
+                    source={avatar? {uri: avatar} : IMG_DEFAULTPROFILE}
+                    style={avatar && { width: 40, height: 40 }} />
+            </ProfileImgSection>
             <InfoSection style={{borderTopWidth: key==0?0:0.5}}>
                 <ProfileName>{fullName}</ProfileName>
                 <ProfileNumber>{phones[0]}</ProfileNumber>
@@ -156,10 +163,19 @@ const Item = styled.TouchableOpacity`
     padding: 0 16px 12px 16px;
     align-items: center;
 `
-const ProfileImg = styled.Image`
+const ProfileImgSection = styled.View`
     margin-top: 14px;
-    height: 40px;
     width: 40px;
+    height: 40px;
+    background-color: #F2F2F2;
+    border-radius: 100px;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+`
+const ProfileImg = styled.Image`
+    height: 30px;
+    width: 30px;
     border-radius: 100px;
 `
 const InfoSection = styled.View`
