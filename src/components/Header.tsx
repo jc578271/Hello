@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { Platform, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
@@ -7,6 +7,9 @@ import { IC_MENU, IC_CAM } from "../assets";
 
 const Header = ({ route, navigation }: any) => {
     const insets = useSafeAreaInsets()
+    const menuOnPress = useCallback(() => {
+        navigation.openDrawer()
+    }, [])
     return (
         <>
         <View style={{
@@ -17,7 +20,7 @@ const Header = ({ route, navigation }: any) => {
         </View>
         <Container>
             <MenuBtn
-                onPress={() => navigation.openDrawer()}
+                onPress={menuOnPress}
             >
                 <MenuImg source={IC_MENU} />
             </MenuBtn>

@@ -273,10 +273,9 @@ const AddItemContact = ({ navigation, route }) => {
             // @ts-ignore
             dispatch(updateContactAction(submit))
             navigation.navigate("Contact")
-            console.log(params.id)
         }
 
-    }, [isValid, params, isSubmitted])
+    }, [isValid, params])
 
     const editingInfoRender = useCallback((typeInfo) => {
         const { isEditing, count, id, typeKeyboard } = editingType[typeInfo]
@@ -358,8 +357,8 @@ const AddItemContact = ({ navigation, route }) => {
                 </OrganizationSection>
                 <AddSection>
                     {editingInfoRender("phones")}
-                    <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("phones")}>
+                    <AddGroup onPress={() => addInfoOnPress("phones")}>
+                        <AddBtn>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add phone number</AddText>
@@ -367,8 +366,8 @@ const AddItemContact = ({ navigation, route }) => {
                 </AddSection>
                 <AddSection>
                     {editingInfoRender("emails")}
-                    <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("emails")}>
+                    <AddGroup onPress={() => addInfoOnPress("emails")}>
+                        <AddBtn>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add email</AddText>
@@ -376,8 +375,8 @@ const AddItemContact = ({ navigation, route }) => {
                 </AddSection>
                 <AddSection>
                     {editingInfoRender("addresses")}
-                    <AddGroup>
-                        <AddBtn onPress={() => addInfoOnPress("addresses")}>
+                    <AddGroup onPress={() => addInfoOnPress("addresses")}>
+                        <AddBtn>
                             <AddIc source={IC_GREENADD} />
                         </AddBtn>
                         <AddText>Add address</AddText>
@@ -386,8 +385,8 @@ const AddItemContact = ({ navigation, route }) => {
                 <AddSection style={{ borderBottomWidth: params.birthday.length == 0 ? 0.5 : 0 }}>
                     {editingInfoRender("birthday")}
                     {params.birthday.length == 0 ? (
-                        <AddGroup>
-                            <AddBtn onPress={() => addInfoOnPress("birthday")}>
+                        <AddGroup onPress={() => addInfoOnPress("birthday")}>
+                            <AddBtn>
                                 <AddIc source={IC_GREENADD} />
                             </AddBtn>
                             <AddText>Add birthday</AddText>
@@ -499,7 +498,7 @@ const AddSection = styled.View`
     border-bottom-width: 0.5px;
     border-bottom-color: solid rgba(0, 0, 0, 0.1);
 `
-const AddGroup = styled.View`
+const AddGroup = styled.TouchableOpacity`
     flex-direction: row;
     padding-top: 10px;
 `
@@ -517,7 +516,7 @@ const AddText = styled.Text`
 
     color: #333333;
 `
-const AddBtn = styled.TouchableOpacity`
+const AddBtn = styled.View`
 
 `
 const AddIc = styled.Image`

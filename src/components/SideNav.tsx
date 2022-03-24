@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Platform, StatusBar, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
@@ -12,7 +12,6 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
     const [listHeight, setListHeight] = useState(0)
     const insets = useSafeAreaInsets()
     
-    
     useEffect(() => {
         let initVal = isExpanded ? listHeight : 0
         let finalVal = isExpanded ? 0 : listHeight
@@ -24,19 +23,19 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         }).start()
     }, [isExpanded])
 
-    const itemOnPress = ({title, collections}:any) => {
+    const itemOnPress = useCallback(({ title, collections }: any) => {
         navigation.navigate('Collections', {
             title,
             collections
         })
-    }
+    }, [])
 
-    const itemRender = ({title, collections}, key) => (
-        <ItemSection key={key} onPress={() => itemOnPress({title, collections})}>
-            <ItemIc source={IC_ITEMCOLLECTION}/>
+    const itemRender = useCallback(({ title, collections }, key) => (
+        <ItemSection key={key} onPress={() => itemOnPress({ title, collections })}>
+            <ItemIc source={IC_ITEMCOLLECTION} />
             <ItemText>{title}</ItemText>
         </ItemSection>
-    )
+    ), [])
 
     return (
         <>

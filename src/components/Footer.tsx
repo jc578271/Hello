@@ -103,8 +103,10 @@ const AddImg = styled.Image`
     height: 100%;
 `
 const NavBg = styled.Image`
-    width: ${width}px;
+    width: 100%;
     position: absolute;
+    right: 0;
+    left: 0;
     bottom: 0;
 `
 const ItemImg = styled.Image<{isFocused?:boolean}>`

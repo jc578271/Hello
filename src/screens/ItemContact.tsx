@@ -19,7 +19,7 @@ const FeatureItem = ({ icon, text, available }:{icon:any, text: string, availabl
         <ItemFeatureIcBg available={available}>
             <ItemFeatureIc available={available} text={text} source={icon} />
         </ItemFeatureIcBg>
-        <ItemFeatureText>{text}</ItemFeatureText>
+        <ItemFeatureText available={available}>{text}</ItemFeatureText>
     </ItemFeature>
 )
 
@@ -236,7 +236,7 @@ const ItemFeatureIc = styled.Image<{text?:string, available?:boolean}>`
     width: ${props => props.text == "Message" ? '18px' : '24px'};
     tint-color: ${props => props.available ? '#FFFFFF' : '#DADADA;'}
 `
-const ItemFeatureText = styled.Text`
+const ItemFeatureText = styled.Text<{available?:boolean}>`
     margin-top: 5px;
     font-weight: 400;
     font-size: 11px;
@@ -245,7 +245,7 @@ const ItemFeatureText = styled.Text`
 
     letter-spacing: -0.41px;
 
-    color: #F2A54A;
+    color: ${props => props.available ? "#F2A54A" : "#BDBDBD"} ;
 `
 const PhoneSection = styled.View`
     margin: 0 16px;

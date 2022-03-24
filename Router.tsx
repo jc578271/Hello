@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import Home from "./src/screens/Home";
 import Contact from "./src/screens/Contact";
-import { NavigationContainer } from "@react-navigation/native"
+import { getFocusedRouteNameFromRoute, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createDrawerNavigator } from '@react-navigation/drawer'
@@ -17,7 +17,7 @@ const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
 
-const TabStack = ({ route, navigation }: any) => {
+const TabStack = ({ navigation }: any) => {
     return (
         <Tab.Navigator
             initialRouteName="Contact"
@@ -26,26 +26,26 @@ const TabStack = ({ route, navigation }: any) => {
         >
             <Tab.Screen name="Contact" component={Contact} />
             <Tab.Screen name="History" component={History} />
+            <Tab.Screen name="Collections" component={Collections} />
         </Tab.Navigator>
     )
 }
 
-const ContactStack = () => {
+const AddStack = () => {
     return (
         <Stack.Navigator
             screenOptions={{ headerShown: false, presentation: "modal" }}>
             <Stack.Screen name="TabStack" component={TabStack} />
-            <Stack.Screen name="Collections" component={Collections} />
             <Stack.Screen name="AddContact" component={AddEditContact} />
         </Stack.Navigator>
     )
 }
-const OtherStack = () => {
+
+const EditStack = () => {
     return (
         <Stack.Navigator
             screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="ContactStack" component={ContactStack} />
-            <Stack.Screen name="Collections" component={Collections} />
+            <Stack.Screen name="AddStack" component={AddStack} />
             <Stack.Screen name="ItemContact" component={ItemContact} />
             <Stack.Screen name="EditContact" component={AddEditContact} />
         </Stack.Navigator>
@@ -62,7 +62,7 @@ const Router = () => {
                     drawerContent={props => <SideNav {...props} />}
                 >
                     <Drawer.Screen options={{ swipeEnabled: false }} name="Home" component={Home} />
-                    <Drawer.Screen name="DrawStack" component={OtherStack} />
+                    <Drawer.Screen name="DrawStack" component={EditStack} />
                 </Drawer.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>
