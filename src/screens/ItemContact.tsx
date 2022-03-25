@@ -1,10 +1,12 @@
+// @ts-ignore
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Platform, StatusBar, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
 import styled from "styled-components/native";
 import { IC_BACK, IC_CALL, IC_EDITPROFILEIMG, IMG_PROFILE, IMG_DEFAULTPROFILE, IC_MESSAGE, IC_FACETIME, IC_EMAIL } from "../assets";
-import { deleteContactAction, useContacts } from "../store";
+import { useContacts } from "../store";
+import { deleteContactAction } from "../actions"
 import { RawContact } from "../types";
 
 const featureItems = [
@@ -44,10 +46,11 @@ const ItemContact = ({ navigation, route }) => {
     }, [])
 
     useEffect(() => {
-        if (isMounted) {
-            setItemContact(contacts.find(item => item?.id == route.params?.id))
-        }
-    }, [contacts, JSON.stringify(itemContact), route.params.id, isMounted])
+        // if (isMounted) {
+            setItemContact(contacts.find(item => item?.id == route.params.id))
+        // }
+        console.log("image", itemContact.avatar)
+    }, [JSON.stringify(itemContact), route.params.id])
 
     const deleteMessage = useCallback(() => {
         navigation.navigate("Contact")
@@ -58,7 +61,7 @@ const ItemContact = ({ navigation, route }) => {
         console.log(itemContact.id)
         navigation.navigate("EditContact", { id: itemContact.id })
     }, [JSON.stringify(itemContact)])
-
+    console.log('check itemContact =',itemContact)
     return (
         <>
         <View style={{
@@ -81,8 +84,8 @@ const ItemContact = ({ navigation, route }) => {
                 <InfoSection>
                     <ProfileImgSection>
                         <ProfileImg 
-                            source={itemContact?.avatar ? { uri: itemContact.avatar } : IMG_DEFAULTPROFILE}
-                            style={itemContact?.avatar && { width: 100, height: 100 }} />
+                            source={itemContact.avatar ? { uri: itemContact.avatar } : IMG_DEFAULTPROFILE}
+                            style={itemContact.avatar && { width: 100, height: 100 }} />
                         <CamIcon source={IC_EDITPROFILEIMG} />
                     </ProfileImgSection>
                     <ProfileText>{itemContact?.firstName} {itemContact?.lastName}</ProfileText>

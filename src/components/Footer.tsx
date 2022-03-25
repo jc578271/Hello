@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { memo } from "react";
 import { Dimensions, Platform, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -50,7 +51,8 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             </Container>
             <View style={{
                 backgroundColor: '#F2A54A',
-                height: Platform.OS == "ios" ? insets.bottom+10 : 10}}></View>
+                height: Platform.OS == "ios" ? insets.bottom + 10 : 10
+            }}/>
             </>
         )
     } else {

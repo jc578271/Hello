@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, {memo, useCallback, useEffect, useState} from "react";
 import { LayoutChangeEvent, ScrollView, View } from "react-native";
 import styled from "styled-components/native";

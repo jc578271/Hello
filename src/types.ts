@@ -9,3 +9,9 @@ export interface RawContact {
     birthday: number[],
     avatar: string,
 }
+
+export interface RawCollection {
+    id: string,
+    title: string,
+    list: []
+}

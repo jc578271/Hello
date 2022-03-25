@@ -7,11 +7,11 @@ export const groupedData = (db: RawContact[]) => {
         let words = fullName.split(' ')
         let firstCharOfLastname = words[words.length - 1][0] || ""
         let normalizeChar = nonAccentVietnamese(firstCharOfLastname.toLocaleLowerCase()).toUpperCase()
-        let temp = result[normalizeChar]
         if (/^[0-9]+$/.test(normalizeChar)) {
+            let temp = result["Digit"]
             result["Digit"] = temp ? [...temp, item] : [item]
         } else {
-            let normalizeChar = nonAccentVietnamese(firstCharOfLastname.toLocaleLowerCase()).toUpperCase()
+            let temp = result[normalizeChar]
             result[normalizeChar] = temp ? [...temp, item] : [item]
         }
     })
@@ -27,6 +27,7 @@ export const groupedData = (db: RawContact[]) => {
         })
         return obj
     }, {})
+    // console.log(result["Digit"])
 
     if(result["Digit"]) sortedResult = { "Digit": result["Digit"], ...sortedResult }
     return sortedResult

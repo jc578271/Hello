@@ -1,9 +1,14 @@
+// @ts-ignore
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Platform, StatusBar, View } from "react-native";
+import {Animated, Platform, ScrollView, StatusBar, View} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styled from "styled-components/native";
-import { IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IMG_PROFILE } from "../assets";
-import { collectionDB } from '../assets/dummydb/db'
+import {IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IC_REDDELETE, IMG_PROFILE} from "../assets";
+import {RawCollection} from "../types";
+import {useCollections} from "../store";
+// @ts-ignore
+import moment from "moment";
+
 
 
 const SideNav = ({ state, navigation, descriptors }:any) => {
@@ -11,6 +16,17 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
     const animation = useRef(new Animated.ValueXY({x:0, y: 0})).current
     const [listHeight, setListHeight] = useState(0)
     const insets = useSafeAreaInsets()
+    const collectionsStore = useCollections()
+    const [collections, setCollections] = useState<RawCollection[]>([])
+    const [isEditing, setIsEditing] = useState(false)
+
+    useEffect(() => {
+        setCollections(collectionsStore)
+    }, [collectionsStore])
+
+    // useEffect(() => {
+    //     console.log(collections)
+    // }, [collections])
     
     useEffect(() => {
         let initVal = isExpanded ? listHeight : 0
@@ -23,19 +39,50 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         }).start()
     }, [isExpanded])
 
-    const itemOnPress = useCallback(({ title, collections }: any) => {
-        navigation.navigate('Collections', {
-            title,
-            collections
-        })
+    const itemOnPress = useCallback(({ id }: any) => {
+        navigation.navigate('Collections', { id })
     }, [])
 
-    const itemRender = useCallback(({ title, collections }, key) => (
-        <ItemSection key={key} onPress={() => itemOnPress({ title, collections })}>
+    const onAddPress = useCallback(() => {
+        let id = moment().valueOf().toString()
+        setIsEditing(true)
+        setCollections(collectionPrev => [
+            ...collectionPrev,
+            { id, title: "", list: [] }
+        ])
+    }, [isEditing])
+
+    const onDeletePress = useCallback((id) => {
+        console.log("delete", id)
+    }, [])
+
+    const onInputChange = useCallback((text, id) => {
+        setCollections(collectionPrev => {
+            console.log(collectionPrev)
+            let newList = collectionPrev.map(item => item.id == id ? {...item, title: text}: item)
+            return newList
+        })
+    }, [collections])
+
+    const itemRender = useCallback(({ id, title }, key) => (
+        <ItemSection key={key} onPress={() => itemOnPress({ id })}>
             <ItemIc source={IC_ITEMCOLLECTION} />
             <ItemText>{title}</ItemText>
         </ItemSection>
-    ), [])
+    ), [isEditing])
+
+    const itemInputRender = useCallback(({ id, title }, key) => (
+        <ItemInputSection key={key}>
+            <ItemIc source={IC_ITEMCOLLECTION} />
+            <ItemInput
+                value={title}
+                onChangeText={text => onInputChange(text, id)}
+            />
+            <DeleteBtn onPress={() => onDeletePress(id)}>
+                <DeleteIc source={IC_REDDELETE}/>
+            </DeleteBtn>
+        </ItemInputSection>
+    ), [isEditing, collections])
 
     return (
         <>
@@ -53,7 +100,7 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
                 </TextSection>
             </ProfileSection>
             <AddCollectionSection>
-                <AddBtn>
+                <AddBtn onPress={onAddPress}>
                     <AddImgBtn source={IC_ADDCOLLECTION} />
                 </AddBtn>
                 <AddTitle>New collection</AddTitle>
@@ -63,15 +110,22 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
                     <DropImgBtn style={{transform: [{scaleY: isExpanded?1:-1}]}} source={IC_DROP} />
                 </DropBtn>
                 <DropText>Collection</DropText>
-                <DropEditBtn><DropEditText>Edit</DropEditText></DropEditBtn>
+                <DropEditBtn><DropEditText>{isEditing?'Save':'Edit'}</DropEditText></DropEditBtn>
             </DropSection>
-            
-            <ListSection onLayout={e => setListHeight(e.nativeEvent.layout.height)}>
-                <Animated.View style={[animation.getLayout()]}>
-                    {collectionDB.map((collection, key) => itemRender(collection, key))}
-                </Animated.View>
-            </ListSection>
-            
+
+            {/*<ScrollView>*/}
+                <ListSection  onLayout={e => setListHeight(e.nativeEvent.layout.height)}>
+                    <Animated.ScrollView style={[animation.getLayout()]}>
+                        {collections.map((collection, key) => (
+                            isEditing
+                                ? itemInputRender(collection, key)
+                                : itemRender(collection, key)
+                        ))}
+                    </Animated.ScrollView>
+                </ListSection>
+            {/*</ScrollView>*/}
+
+
         </Container>
         </>
         
@@ -189,8 +243,9 @@ const DropEditText = styled.Text`
 
     color: #F2A54A;
 `
-const ListSection = styled.ScrollView`
-    display: flex;
+const ListSection = styled.View`
+  overflow: hidden;
+  height: 100%;
 `
 const ItemSection = styled.TouchableOpacity`
     display: flex;
@@ -215,4 +270,20 @@ const ItemText = styled.Text`
     /* Gray 1 */
 
     color: #333333;
+`
+const ItemInputSection = styled.View`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 20px;
+`
+const ItemInput = styled.TextInput`
+  flex: auto;
+`
+const DeleteBtn = styled.TouchableOpacity`
+
+`
+const DeleteIc = styled.Image`
+  height: 16px;
+  width: 16px;
 `

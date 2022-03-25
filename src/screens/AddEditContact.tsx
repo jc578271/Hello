@@ -1,17 +1,21 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import { Platform, StatusBar, Text, View, BackHandler, TextInput } from "react-native";
+// @ts-ignore
+import React, {memo, useCallback, useEffect, useRef, useState} from "react";
+import {Platform, StatusBar, Text, View, BackHandler, TextInput} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
+// @ts-ignore
 import moment from "moment"
-import Toast, { ToastShowParams } from "react-native-toast-message"
+import ImageResizer from 'react-native-image-resizer';
+import Toast, {ToastShowParams} from "react-native-toast-message"
 import * as ImagePicker from "react-native-image-picker"
-import { IC_EDITPROFILEIMG, IC_GREENADD, IC_REDDELETE, IMG_DEFAULTPROFILE } from "../assets";
-import { updateContactAction, useContacts } from "../store";
-import { useDispatch } from "react-redux";
-import { toastConfig } from "../components/BaseToast";
+import {IC_EDITPROFILEIMG, IC_GREENADD, IC_REDDELETE, IMG_DEFAULTPROFILE} from "../assets";
+import {useContacts} from "../store";
+import {updateContactAction} from "../actions"
+import {useDispatch} from "react-redux";
+import {toastConfig} from "../components/BaseToast";
 
-const AddItemContact = ({ navigation, route }) => {
+const AddItemContact = ({navigation, route}) => {
     const insets = useSafeAreaInsets()
     const [params, setParams] = useState({
         id: moment().valueOf().toString(),
@@ -51,7 +55,7 @@ const AddItemContact = ({ navigation, route }) => {
         }
     })
     const [isSubmitted, setSubmitted] = useState(false)
-    const [isValid, setIsValid] = useState({ fullName: false, phone: false })
+    const [isValid, setIsValid] = useState({fullName: false, phone: false})
     const dispatch = useDispatch()
     const contacts = useContacts()
     const [isMounted, setMounted] = useState(false)
@@ -63,20 +67,20 @@ const AddItemContact = ({ navigation, route }) => {
     useEffect(() => {
         setSubmitted(false)
         if (isMounted && route.params?.id) {
-            let itemContact = contacts.find(item=>item.id == route.params.id)
+            let itemContact = contacts.find(item => item.id == route.params.id)
             let {
                 phones,
                 emails,
                 addresses,
                 birthday
             } = itemContact
-            setParams(prev=> {
-                setEditingType(editPrev=> ({
+            setParams(prev => {
+                setEditingType(editPrev => ({
                     ...editPrev,
-                    phones: { ...editPrev.phones, count: phones.length },
-                    emails: { ...editPrev.emails, count: emails.length },
-                    addresses: { ...editPrev.addresses, count: addresses.length },
-                    birthday: { ...editPrev.birthday, count: birthday.length },
+                    phones: {...editPrev.phones, count: phones.length},
+                    emails: {...editPrev.emails, count: emails.length},
+                    addresses: {...editPrev.addresses, count: addresses.length},
+                    birthday: {...editPrev.birthday, count: birthday.length},
                 }))
                 return {
                     ...prev,
@@ -84,14 +88,14 @@ const AddItemContact = ({ navigation, route }) => {
                 }
             })
         }
-        
+
     }, [isSubmitted, isMounted, route.params])
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
             isValidPhone = !!params.phones.filter(item => item.trim() != "").length
 
-        setIsValid({ fullName: isValidName, phone: isValidPhone })
+        setIsValid({fullName: isValidName, phone: isValidPhone})
 
     }, [JSON.stringify(params)])
 
@@ -112,7 +116,10 @@ const AddItemContact = ({ navigation, route }) => {
             includeBase64: false,
             includeExtra: true,
         }, (res) => {
-            setParams(prev => ({ ...prev, avatar: res.assets?.length ? res.assets[0]?.uri : "" }));
+            ImageResizer.createResizedImage(res.assets[0]?.uri, 200, 200, "PNG", 100)
+                .then(response => {
+                    setParams(prev => ({...prev, avatar: res.assets?.length ? response.uri : ""}));
+                })
         })
     }, [])
 
@@ -278,14 +285,14 @@ const AddItemContact = ({ navigation, route }) => {
     }, [isValid, params])
 
     const editingInfoRender = useCallback((typeInfo) => {
-        const { isEditing, count, id, typeKeyboard } = editingType[typeInfo]
+        const {isEditing, count, id, typeKeyboard} = editingType[typeInfo]
         const list = params[typeInfo]
         return Array(count).fill(0)
             .map((x: any, key: number) => {
                 return (
                     <EditSection key={key}>
                         <DeleteBtn onPress={() => infoDeleteOnPress(key, typeInfo)}>
-                            <DeleteIc source={IC_REDDELETE} />
+                            <DeleteIc source={IC_REDDELETE}/>
                         </DeleteBtn>
                         {isEditing && typeInfo == "birthday" ? dialogModalRender(key)
                             : (isEditing && id == key) || list[key] == "" ? (
@@ -309,7 +316,6 @@ const AddItemContact = ({ navigation, route }) => {
     }, [editingType])
 
 
-
     return (
         <>
             <View style={{
@@ -326,14 +332,15 @@ const AddItemContact = ({ navigation, route }) => {
                 </DoneBtn>
             </HeaderSection>
             <Container>
-                
+
                 <ProfileImgSection>
                     <ProfileImg
-                        source={params.avatar ? { uri: params.avatar } : IMG_DEFAULTPROFILE}
-                        style={params.avatar && { width: 100, height: 100 }}
+                        resizeMode="cover"
+                        source={params.avatar ? {uri: params.avatar} : IMG_DEFAULTPROFILE}
+                        style={params.avatar && {width: 100, height: 100}}
                     />
                     <CamBtn onPress={camOnPress}>
-                        <CamIcon source={IC_EDITPROFILEIMG} />
+                        <CamIcon source={IC_EDITPROFILEIMG}/>
                     </CamBtn>
 
                 </ProfileImgSection>
@@ -341,25 +348,25 @@ const AddItemContact = ({ navigation, route }) => {
                     <SurnameInput
                         value={params.firstName}
                         onChangeText={(text) => profileInfoOnChange("firstName", text)}
-                        placeholder="First name" />
+                        placeholder="First name"/>
                 </SurnameSection>
                 <LastnameSection>
                     <LastnameInput
                         value={params.lastName}
                         onChangeText={(text) => profileInfoOnChange("lastName", text)}
-                        placeholder="Last name" />
+                        placeholder="Last name"/>
                 </LastnameSection>
                 <OrganizationSection>
                     <OrganizationInput
                         value={params.organization}
                         onChangeText={(text) => profileInfoOnChange("organization", text)}
-                        placeholder="Organization" />
+                        placeholder="Organization"/>
                 </OrganizationSection>
                 <AddSection>
                     {editingInfoRender("phones")}
                     <AddGroup onPress={() => addInfoOnPress("phones")}>
                         <AddBtn>
-                            <AddIc source={IC_GREENADD} />
+                            <AddIc source={IC_GREENADD}/>
                         </AddBtn>
                         <AddText>Add phone number</AddText>
                     </AddGroup>
@@ -368,7 +375,7 @@ const AddItemContact = ({ navigation, route }) => {
                     {editingInfoRender("emails")}
                     <AddGroup onPress={() => addInfoOnPress("emails")}>
                         <AddBtn>
-                            <AddIc source={IC_GREENADD} />
+                            <AddIc source={IC_GREENADD}/>
                         </AddBtn>
                         <AddText>Add email</AddText>
                     </AddGroup>
@@ -377,17 +384,17 @@ const AddItemContact = ({ navigation, route }) => {
                     {editingInfoRender("addresses")}
                     <AddGroup onPress={() => addInfoOnPress("addresses")}>
                         <AddBtn>
-                            <AddIc source={IC_GREENADD} />
+                            <AddIc source={IC_GREENADD}/>
                         </AddBtn>
                         <AddText>Add address</AddText>
                     </AddGroup>
                 </AddSection>
-                <AddSection style={{ borderBottomWidth: params.birthday.length == 0 ? 0.5 : 0 }}>
+                <AddSection style={{borderBottomWidth: params.birthday.length == 0 ? 0.5 : 0}}>
                     {editingInfoRender("birthday")}
                     {params.birthday.length == 0 ? (
                         <AddGroup onPress={() => addInfoOnPress("birthday")}>
                             <AddBtn>
-                                <AddIc source={IC_GREENADD} />
+                                <AddIc source={IC_GREENADD}/>
                             </AddBtn>
                             <AddText>Add birthday</AddText>
                         </AddGroup>
@@ -395,7 +402,7 @@ const AddItemContact = ({ navigation, route }) => {
 
                 </AddSection>
             </Container>
-            <Toast config={toastConfig} />
+            <Toast config={toastConfig}/>
         </>
     )
 }
@@ -403,167 +410,158 @@ const AddItemContact = ({ navigation, route }) => {
 export default memo(AddItemContact)
 
 const Container = styled.ScrollView`
-    background-color: #FFFFFF;
-    display: flex;
-    flex: auto;
-    padding: 0px 16px;
+  background-color: #FFFFFF;
+  display: flex;
+  flex: auto;
+  padding: 0 16px;
 `
 const HeaderSection = styled.View`
-background-color: #FFFFFF;
-    padding: 0px 16px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  background-color: #FFFFFF;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 `
 const CancelBtn = styled.TouchableOpacity`
 
 `
 const CancelText = styled.Text`
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 22px;
-    /* identical to box height, or 122% */
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+  /* identical to box height, or 122% */
 
-    letter-spacing: -0.41px;
+  letter-spacing: -0.41px;
 
-    color: #F2A54A;
+  color: #F2A54A;
 `
 const DoneBtn = styled.TouchableOpacity`
-    
+
 `
 const DoneText = styled.Text<{ isValid?: { fullName: boolean, phone: boolean } }>`
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 22px;
-    /* identical to box height, or 122% */
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+  /* identical to box height, or 122% */
 
-    text-align: center;
-    letter-spacing: -0.41px;
+  text-align: center;
+  letter-spacing: -0.41px;
 
-    /* Gray 3 */
+  /* Gray 3 */
 
-    color: ${(props) => props.isValid.fullName && props.isValid.phone ? '#F2A54A' : '#828282'} ;
+  color: ${(props) => props.isValid.fullName && props.isValid.phone ? '#F2A54A' : '#828282'};
 `
 const ProfileImgSection = styled.View`
-    margin-top: 12px;
-    width: 100px;
-    height: 100px;
-    background-color: #F2F2F2;
-    border-radius: 100px;
-    align-self: center;
-    align-items: center;
-    justify-content: center;
+  margin-top: 12px;
+  width: 100px;
+  height: 100px;
+  background-color: #F2F2F2;
+  border-radius: 100px;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
 `
 const ProfileImg = styled.Image`
-    height: 80px;
-    width: 80px;
-    border-radius: 100px;
+  height: 80px;
+  width: 80px;
+  border-radius: 100px;
 `
 const CamBtn = styled.TouchableOpacity`
-    position: absolute;
-    bottom: 0;
-    right: 0;
+  position: absolute;
+  bottom: 0;
+  right: 0;
 `
 const CamIcon = styled.Image`
-    
+
 `
 const SurnameSection = styled.View`
-    margin-top: 8px;
-    padding: 11px 11px;
-    border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);
+  margin-top: 8px;
+  padding: 11px 11px;
+  border-bottom-width: 0.5px;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
 `
 const SurnameInput = styled.TextInput`
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 22px;
-    /* identical to box height, or 147% */
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 22px;
+  /* identical to box height, or 147% */
 
-    letter-spacing: -0.41px;
+  letter-spacing: -0.41px;
 `
 const LastnameSection = styled(SurnameSection)`
-    margin-top: 0;
+  margin-top: 0;
 `
 const LastnameInput = styled(SurnameInput)`
 
 `
 const OrganizationSection = styled(SurnameSection)`
-    margin-top: 0;
+  margin-top: 0;
 `
 const OrganizationInput = styled(SurnameInput)`
 
 `
 const AddSection = styled.View`
-    padding: 34px 0 10px 0;
-    border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);
+  padding: 34px 0 10px 0;
+  border-bottom-width: 0.5px;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
 `
 const AddGroup = styled.TouchableOpacity`
-    flex-direction: row;
-    padding-top: 10px;
+  flex-direction: row;
+  padding-top: 10px;
 `
 const AddText = styled.Text`
-    margin-left: 16px;
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 22px;
-    /* identical to box height, or 147% */
+  margin-left: 16px;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 22px;
+  /* identical to box height, or 147% */
 
-    letter-spacing: -0.41px;
-    text-transform: lowercase;
+  letter-spacing: -0.41px;
+  text-transform: lowercase;
 
-    /* Gray 1 */
+  /* Gray 1 */
 
-    color: #333333;
+  color: #333333;
 `
 const AddBtn = styled.View`
 
 `
 const AddIc = styled.Image`
-    height: 24px;
-    width: 24px;
+  height: 24px;
+  width: 24px;
 `
 const EditSection = styled.View`
-    flex-direction: row;
-    padding: 10px 0 10px 0;
-    border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);
-    align-items: center;
+  flex-direction: row;
+  padding: 10px 0 10px 0;
+  border-bottom-width: 0.5px;
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+  align-items: center;
 `
 const DeleteBtn = styled.TouchableOpacity``
 const DeleteIc = styled.Image``
 const ContextButton = styled.TouchableOpacity`
-    flex: auto;
-    margin-left: 16px;
+  flex: auto;
+  margin-left: 16px;
 `
 const ContextText = styled.Text`
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 22px;
-    /* identical to box height, or 147% */
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 22px;
+  /* identical to box height, or 147% */
 
-    letter-spacing: -0.41px;
+  letter-spacing: -0.41px;
 
-    /* Blue 1 */
+  /* Blue 1 */
 
-    color: #2F80ED;
+  color: #2F80ED;
 `
 const EditTextInput = styled.TextInput`
-    margin-left: 16px;
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 22px;
-    flex:auto;
-    /* identical to box height, or 147% */
+  margin-left: 16px;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 22px;
+  flex: auto;
+  /* identical to box height, or 147% */
 
-    letter-spacing: -0.41px;
+  letter-spacing: -0.41px;
 `
-const DateModal = styled.View`
-    background-color: #FFFFFF;
-    align-items: center;
-    border-radius: 10px;
-`
-const DateConfirmBtn = styled.TouchableOpacity`
-
-`
-const DateCancelBtn = styled

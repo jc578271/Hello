@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { memo } from "react";
 import Home from "./src/screens/Home";
 import Contact from "./src/screens/Contact";
@@ -13,6 +14,7 @@ import SideNav from "./src/components/SideNav";
 import Collections from "./src/screens/Collections";
 import AddEditContact from "./src/screens/AddEditContact";
 import ItemContact from "./src/screens/ItemContact";
+import CollectionHeader from "./src/components/CollectionHeader";
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
@@ -20,37 +22,34 @@ const Drawer = createDrawerNavigator()
 const TabStack = ({ navigation }: any) => {
     return (
         <Tab.Navigator
-            initialRouteName="Contact"
             screenOptions={{ header: props => <Header navigation={navigation} {...props} /> }}
             tabBar={props => <Footer {...props} />}
         >
             <Tab.Screen name="Contact" component={Contact} />
             <Tab.Screen name="History" component={History} />
-            <Tab.Screen name="Collections" component={Collections} />
         </Tab.Navigator>
     )
 }
 
-const AddStack = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{ headerShown: false, presentation: "modal" }}>
+const CollectionStack = ({ navigation, route }:any) => (
+    <Stack.Navigator
+        screenOptions={{ header: props => <CollectionHeader routeParent={route} navigation={navigation} {...props} />}}
+    >
+        <Stack.Screen name="Collection" component={Collections} />
+    </Stack.Navigator>
+)
+
+const MainStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Group screenOptions={{presentation: "modal"}}>
             <Stack.Screen name="TabStack" component={TabStack} />
             <Stack.Screen name="AddContact" component={AddEditContact} />
-        </Stack.Navigator>
-    )
-}
-
-const EditStack = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="AddStack" component={AddStack} />
-            <Stack.Screen name="ItemContact" component={ItemContact} />
-            <Stack.Screen name="EditContact" component={AddEditContact} />
-        </Stack.Navigator>
-    )
-}
+        </Stack.Group>
+        <Stack.Screen name="Collections" component={CollectionStack} />
+        <Stack.Screen name="ItemContact" component={ItemContact} />
+        <Stack.Screen name="EditContact" component={AddEditContact} />
+    </Stack.Navigator>
+)
 
 const Router = () => {
     return (
@@ -62,7 +61,12 @@ const Router = () => {
                     drawerContent={props => <SideNav {...props} />}
                 >
                     <Drawer.Screen options={{ swipeEnabled: false }} name="Home" component={Home} />
-                    <Drawer.Screen name="DrawStack" component={EditStack} />
+                    <Drawer.Screen options={({route}) => {
+                        const routeName = getFocusedRouteNameFromRoute(route)
+                        if (routeName != "TabStack") return {
+                            swipeEnabled: false
+                        }
+                    }} name="DrawStack" component={MainStack} />
                 </Drawer.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>
