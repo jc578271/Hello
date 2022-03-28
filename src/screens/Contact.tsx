@@ -1,13 +1,13 @@
 // @ts-ignore
 import React, {memo, useCallback, useEffect, useState} from "react";
-import {LayoutChangeEvent, ScrollView, View} from "react-native";
+import {AppState, BackHandler, LayoutChangeEvent, Platform, ScrollView, ToastAndroid, View} from "react-native";
 import styled from "styled-components/native";
 import {IC_SEARCH, IMG_DEFAULTPROFILE} from '../assets'
 import {useContacts} from "../store";
 import {filterData, groupedData} from "../utils/helper";
 import FastImage from "react-native-fast-image";
 
-const Contact = ({ navigation }:any) => {
+const Contact = ({ navigation, route }:any) => {
     const chars = ['Digit',
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -26,7 +26,6 @@ const Contact = ({ navigation }:any) => {
         let db = filterData(searchInput, contacts)
         setGroupedContact(groupedData(db))
     }, [isMounted, searchInput, contacts, JSON.stringify(groupedContact)])
-    
 
     const onChangePosYs = (e: LayoutChangeEvent, char: string) => {
         let newPosYs = posYs

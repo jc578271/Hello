@@ -86,7 +86,7 @@ const SideNav = ({ navigation }:any) => {
     ), [isEditing])
 
     const itemInputRender = useCallback(({ id, title }, key) => (
-        <ItemInputSection key={key}>
+        <ItemInputSection topPadding={Platform.OS == "ios" ? 14 : 8} key={key}>
             <ItemIc source={IC_ITEMCOLLECTION} />
             <ItemInput
                 placeholder="input collection"
@@ -289,11 +289,11 @@ const ItemText = styled.Text`
 
     color: #333333;
 `
-const ItemInputSection = styled.View`
+const ItemInputSection = styled.View<{topPadding?: number|string}>`
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 8px 20px;
+    padding: ${props => props.topPadding}px 20px;
 `
 const ItemInput = styled.TextInput`
   flex: auto;

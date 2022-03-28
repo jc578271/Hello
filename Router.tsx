@@ -20,11 +20,14 @@ const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
 
-const TabStack = ({ navigation }: any) => {
+const TabStack = ({ navigation, route, mainRoute }: any) => {
     return (
         <Tab.Navigator
-            screenOptions={{ header: props => <Header navigation={navigation} {...props} /> }}
-            tabBar={props => <Footer {...props} />}
+            screenOptions={{
+                header: props => <Header navigation={navigation} {...props} />
+            }}
+            tabBar={props => <Footer tabRoute={route} mainRoute={mainRoute} {...props} />}
+
         >
             <Tab.Screen name="Contact" component={Contact} />
             <Tab.Screen name="History" component={History} />
@@ -32,16 +35,15 @@ const TabStack = ({ navigation }: any) => {
     )
 }
 
-const MainStack = () => {
+const MainStack = ({ route }) => {
     const auth = useAuth()
-    useEffect(() => {
-        console.log("auth:", auth)
-    }, [auth])
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {!auth?.userId ? <Stack.Screen name="Home" component={Home} />: null}
             <Stack.Group screenOptions={{presentation: "modal"}}>
-                <Stack.Screen name="TabStack" component={TabStack} />
+                <Stack.Screen name="TabStack">
+                    {props => <TabStack {...props} mainRoute={route} />}
+                </Stack.Screen>
                 <Stack.Screen name="AddContact" component={AddEditContact} />
             </Stack.Group>
             <Stack.Screen name="Collections" component={Collections} />

@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, {memo, useCallback, useEffect, useRef, useState} from "react";
-import {KeyboardAvoidingView, Platform, StatusBar} from "react-native";
+import {Dimensions, KeyboardAvoidingView, Platform, StatusBar, View} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
@@ -15,6 +15,7 @@ import {updateContactAction} from "../actions"
 import {useDispatch} from "react-redux";
 import {toastConfig} from "../components/BaseToast";
 import {StatusBarSection} from "../components/Header";
+import FastImage from "react-native-fast-image";
 
 const AddItemContact = ({navigation, route}) => {
     const insets = useSafeAreaInsets()
@@ -340,7 +341,10 @@ const AddItemContact = ({navigation, route}) => {
 
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <KeyBoardView
+            behavior={Platform.OS == "ios" ? "padding" : null}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+        >
             <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
             <HeaderSection>
                 <CancelBtn onPress={() => restoreState()}>
@@ -350,13 +354,12 @@ const AddItemContact = ({navigation, route}) => {
                     <DoneText isValid={isValid}>Done</DoneText>
                 </DoneBtn>
             </HeaderSection>
-            <Container>
+            <Container keyboardShouldPersistTaps='handled'>
 
                 <ProfileImgSection>
                     <ProfileImg
-                        resizeMode="cover"
                         source={params.avatar ? {uri: params.avatar} : IMG_DEFAULTPROFILE}
-                        style={params.avatar && {width: 100, height: 100}}
+                        avatar = {params.avatar}
                     />
                     <CamBtn onPress={camOnPress}>
                         <CamIcon source={IC_EDITPROFILEIMG}/>
@@ -422,11 +425,15 @@ const AddItemContact = ({navigation, route}) => {
                 </AddSection>
             </Container>
             <Toast config={toastConfig}/>
-        </KeyboardAvoidingView>
+        </KeyBoardView>
     )
 }
 
 export default memo(AddItemContact)
+
+const KeyBoardView = styled(KeyboardAvoidingView)`
+  flex: auto;
+`
 
 const Container = styled.ScrollView`
   background-color: #FFFFFF;
@@ -480,9 +487,9 @@ const ProfileImgSection = styled.View`
   align-items: center;
   justify-content: center;
 `
-const ProfileImg = styled.Image`
-  height: 80px;
-  width: 80px;
+const ProfileImg = styled(FastImage)<{avatar?:any}>`
+  height: ${props => props.avatar ? 100 : 80}px;
+  width: ${props => props.avatar ? 100 : 80}px;
   border-radius: 100px;
 `
 const CamBtn = styled.TouchableOpacity`

@@ -1,25 +1,51 @@
 // @ts-ignore
-import React, {memo} from "react";
-import {Platform, View} from "react-native";
+import React, {memo, useCallback, useEffect, useState} from "react";
+import {BackHandler, Keyboard, Platform, ToastAndroid} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import {IC_ADDBTN, IC_HISTORY, IC_LIST, IMG_NAVBG} from "../assets";
+import {getFocusedRouteNameFromRoute} from "@react-navigation/native";
 
 const labelIcons = {
     'Contact': [IC_LIST, 'Danh Bạ'],
     'History': [IC_HISTORY, 'Gần Đây']
 }
 
-
-const Footer = ({ state, descriptors, navigation }: any) => {
+const Footer = ({ state, descriptors, navigation, tabRoute, mainRoute }: any) => {
     const insets = useSafeAreaInsets()
+    const [isShown, setShown] = useState(false)
+    const [exitApp, setExitApp] = useState(0)
+    useEffect(() => {
+        const keyboardShow = Keyboard.addListener('keyboardDidShow', () => setShown(true))
+        const keyboardHide = Keyboard.addListener('keyboardDidHide', () => setShown(false))
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            let mainRouteName = getFocusedRouteNameFromRoute(mainRoute)
+            let tabRouteName = getFocusedRouteNameFromRoute(tabRoute)
+            if (Platform.OS != "ios" && mainRouteName == "TabStack" && tabRouteName == "Contact") {
+                setTimeout(() => setExitApp(0), 2000)
+                if (exitApp == 0) {
+                    setExitApp(prev=>prev+1)
+                    ToastAndroid.show("tab back again to exit", ToastAndroid.SHORT)
+                } else if (exitApp==1) {
+                    BackHandler.exitApp()
+                }
+                return true
+            }
+        })
 
-    const itemRender = (title: string, index: number) => {
+        return () => {
+            backHandler.remove()
+            keyboardShow.remove()
+            keyboardHide.remove()
+        }
+    }, [exitApp, tabRoute, mainRoute])
+
+    const itemRender = useCallback((title: string, index: number) => {
         const isFocused = state.index == index
         return (
             <WrapItem>
                 <ItemBtn onPress={() => navigation.navigate(title)}>
-                    <ItemImg 
+                    <ItemImg
                         isFocused={isFocused}
                         resizeMode="cover" source={labelIcons[title][0]}
                     />
@@ -29,35 +55,32 @@ const Footer = ({ state, descriptors, navigation }: any) => {
                 </ItemBtn>
             </WrapItem>
         )
-    }
+    }, [state.index])
+
     const contactRoute = state.routes[0]
     const historyRoute = state.routes[1]
-    
-    if (state.index < 3) {
-        return (
-            <>
-            <Container>
-                <WrapBtn>
-                    <NavBgSection>
-                        <BgSth/>
-                        <NavBg source={IMG_NAVBG} />
-                        <BgSth/>
-                    </NavBgSection>
 
-                    <AddBtn onPress={() => navigation.navigate('AddContact')}>
-                        <AddImg resizeMode="contain" source={IC_ADDBTN} />
-                    </AddBtn>
-                </WrapBtn>
-                {itemRender(descriptors[contactRoute.key].route.name, 0)}
-                <Sth/>
-                {itemRender(descriptors[historyRoute.key].route.name, 1)}
-            </Container>
-            <FooterSection height={Platform.OS == "ios" ? insets.bottom + 10 : 10}/>
-            </>
-        )
-    } else {
-        return null
-    }
+    return (!isShown || Platform.OS == "ios") && (
+        <>
+        <Container>
+            <WrapBtn>
+                <NavBgSection>
+                    <BgSth/>
+                    <NavBg source={IMG_NAVBG} />
+                    <BgSth/>
+                </NavBgSection>
+
+                <AddBtn onPress={() => navigation.navigate('AddContact')}>
+                    <AddImg resizeMode="contain" source={IC_ADDBTN} />
+                </AddBtn>
+            </WrapBtn>
+            {itemRender(descriptors[contactRoute.key].route.name, 0)}
+            <Sth/>
+            {itemRender(descriptors[historyRoute.key].route.name, 1)}
+        </Container>
+        <FooterSection height={Platform.OS == "ios" ? insets.bottom + 10 : 10}/>
+        </>
+    )
         
     
 }
