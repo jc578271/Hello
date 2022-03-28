@@ -1,5 +1,6 @@
+// @ts-ignore
 import React from "react"
-import Toast, { SuccessToast, ErrorToast } from "react-native-toast-message"
+import {ErrorToast} from "react-native-toast-message"
 
 export const toastConfig = {
     error: (props) => (

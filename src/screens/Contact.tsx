@@ -1,12 +1,13 @@
 // @ts-ignore
 import React, {memo, useCallback, useEffect, useState} from "react";
-import { LayoutChangeEvent, ScrollView, View } from "react-native";
+import {LayoutChangeEvent, ScrollView, View} from "react-native";
 import styled from "styled-components/native";
-import { IC_SEARCH, IMG_PROFILE, IMG_DEFAULTPROFILE } from '../assets'
-import { useContacts } from "../store";
-import { groupedData, filterData } from "../utils/helper";
+import {IC_SEARCH, IMG_DEFAULTPROFILE} from '../assets'
+import {useContacts} from "../store";
+import {filterData, groupedData} from "../utils/helper";
+import FastImage from "react-native-fast-image";
 
-const Contact = ({ route, navigation }:any) => {
+const Contact = ({ navigation }:any) => {
     const chars = ['Digit',
         'A','B','C','D','E','F','G','H','I','J','K','L','M',
         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -33,11 +34,17 @@ const Contact = ({ route, navigation }:any) => {
         setPosYs(newPosYs)
     }
 
+    const onCharPress = useCallback((char: string) => {
+        if(posYs[char] != undefined) {
+            scrollRef?.scrollTo({y: posYs[char]})
+        }
+    }, [])
+
     const groupByCharRender = useCallback(() => {
         return Object.keys(groupedContact).map((char, key) => groupedContact[char]?.length && (
             <View onLayout={e => onChangePosYs(e, char)} key={key}>
                 <CharSection>
-                    <BgCharSection></BgCharSection>
+                    <BgCharSection/>
                     <CharText>{char}</CharText>
                 </CharSection>
                 <ItemsSection>
@@ -83,17 +90,13 @@ const Contact = ({ route, navigation }:any) => {
             </SearchSection>
             <ScrollContent ref={view => setScrollRef(view)}>
                 {groupByCharRender()}
-                <Sth></Sth>
+                <Sth/>
             </ScrollContent>
             <SideCharSection>
                 {chars.map((char, key) => (
                     <SideCharBtn 
                         key={key}
-                        onPress={() => {
-                            if(posYs[char] != undefined) {
-                                scrollRef?.scrollTo({y: posYs[char]})
-                            }
-                        }}>
+                        onPress={() => onCharPress(char)}>
                         <SideCharText >{char}</SideCharText>
                     </SideCharBtn>
                 ))}
@@ -174,7 +177,7 @@ const ProfileImgSection = styled.View`
     align-items: center;
     justify-content: center;
 `
-const ProfileImg = styled.Image`
+const ProfileImg = styled(FastImage)`
     height: 30px;
     width: 30px;
     border-radius: 100px;
@@ -205,7 +208,6 @@ const SideCharSection = styled.View`
     position: absolute;
     right: 10px;
     top: 10px;
-    display: flex;
 `
 const SideCharBtn = styled.TouchableOpacity`
     

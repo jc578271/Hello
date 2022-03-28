@@ -1,30 +1,37 @@
 import * as React from "react";
-import {memo, useCallback} from "react";
-import {Platform, StatusBar, Text, View} from "react-native";
+import {memo, useCallback, useEffect, useState} from "react";
+import {Platform, StatusBar, View} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import {IC_BACK} from "../assets";
+import { StatusBarSection } from "./Header"
+import {useCollections} from "../store";
+import {RawCollection} from "../types";
 
 const CollectionHeader = ({ routeParent, navigation }) => {
     const insets = useSafeAreaInsets()
+    const collections = useCollections()
+    const [itemCollection, setItemCollection] = useState<RawCollection>({
+        id: "", title: "", list: []
+    })
+    useEffect(() => {
+        let newList = [...collections]
+        setItemCollection(newList.find(item => item.id == routeParent.params?.id))
+    }, [collections, routeParent.params?.id])
+
     const onPressBack = useCallback(() => {
         navigation.goBack()
     }, [])
     return (
         <>
-        <View style={{
-            backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top: StatusBar.currentHeight
-        }}>
-            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content"/>
-        </View>
+        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
         <Container>
             <BackBtn onPress={onPressBack}>
                 <BackIc source={IC_BACK}/>
             </BackBtn>
             <TitleSection>
-                <TitleText>General</TitleText>
-                <TitleSubText>8 thanh vien</TitleSubText>
+                <TitleText>{itemCollection?.title}</TitleText>
+                <TitleSubText>{itemCollection?.list.length} members</TitleSubText>
             </TitleSection>
             <Sth/>
         </Container>

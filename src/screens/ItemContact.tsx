@@ -1,13 +1,15 @@
 // @ts-ignore
-import React, { memo, useCallback, useEffect, useState } from "react";
-import { Platform, StatusBar, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useDispatch } from "react-redux";
+import React, {memo, useCallback, useEffect, useState} from "react";
+import {Alert, Platform, StatusBar, View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {useDispatch} from "react-redux";
 import styled from "styled-components/native";
-import { IC_BACK, IC_CALL, IC_EDITPROFILEIMG, IMG_PROFILE, IMG_DEFAULTPROFILE, IC_MESSAGE, IC_FACETIME, IC_EMAIL } from "../assets";
-import { useContacts } from "../store";
-import { deleteContactAction } from "../actions"
-import { RawContact } from "../types";
+import FastImage from "react-native-fast-image";
+import {IC_BACK, IC_CALL, IC_EDITPROFILEIMG, IC_EMAIL, IC_FACETIME, IC_MESSAGE, IMG_DEFAULTPROFILE} from "../assets";
+import {useContacts} from "../store";
+import {deleteContactAction} from "../actions"
+import {RawContact} from "../types";
+import {StatusBarSection} from "../components/Header";
 
 const featureItems = [
     { icon: IC_CALL, text: "Call", typeInfo: "phones"},
@@ -46,33 +48,42 @@ const ItemContact = ({ navigation, route }) => {
     }, [])
 
     useEffect(() => {
-        // if (isMounted) {
+        if (isMounted) {
             setItemContact(contacts.find(item => item?.id == route.params.id))
-        // }
-        console.log("image", itemContact.avatar)
-    }, [JSON.stringify(itemContact), route.params.id])
+        }
+    }, [JSON.stringify(itemContact), route.params.id, isMounted])
 
     const deleteMessage = useCallback(() => {
-        navigation.navigate("Contact")
-        dispatch(deleteContactAction(itemContact?.id))
+        Alert.alert(
+            `Delete ${itemContact?.firstName + itemContact?.lastName} contact`,
+            "Are you sure?",
+            [{
+                text: "Cancel",
+                onPress: () => console.log("cancel"),
+                style: "cancel"
+            }, {
+                text: "Delete",
+                onPress: async () => {
+                    await dispatch(deleteContactAction(itemContact?.id))
+                    navigation.navigate("Contact")
+                }
+            }]
+        )
+
+
     }, [JSON.stringify(itemContact)])
 
     const onEditPress = useCallback(() => {
-        console.log(itemContact.id)
         navigation.navigate("EditContact", { id: itemContact.id })
     }, [JSON.stringify(itemContact)])
-    console.log('check itemContact =',itemContact)
     return (
         <>
-        <View style={{
-            backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
-        }}>
-            <BackgroundColor></BackgroundColor>
-        </View>
+        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}>
+            <BackgroundColor/>
+        </StatusBarSection>
         <Container>
             <Section1>
-                <BackgroundColor></BackgroundColor>
+                <BackgroundColor/>
                 <HeaderSection>
                     <BackBtn onPress={() => navigation.goBack()}>
                         <BackIc source={IC_BACK} />
@@ -83,8 +94,9 @@ const ItemContact = ({ navigation, route }) => {
                 </HeaderSection>
                 <InfoSection>
                     <ProfileImgSection>
-                        <ProfileImg 
+                        <ProfileImg
                             source={itemContact.avatar ? { uri: itemContact.avatar } : IMG_DEFAULTPROFILE}
+
                             style={itemContact.avatar && { width: 100, height: 100 }} />
                         <CamIcon source={IC_EDITPROFILEIMG} />
                     </ProfileImgSection>
@@ -107,13 +119,13 @@ const ItemContact = ({ navigation, route }) => {
             </PhoneSection>
             <NoteSection>
                 <NoteTitle>Note</NoteTitle>
-                <NoteContext></NoteContext>
+                <NoteContext>Note</NoteContext>
             </NoteSection>
             <SendMessageBtn>
                 <SendMessageText>Send message</SendMessageText>
             </SendMessageBtn>
-            <DeleteBtn>
-                <DeleteText onPress={deleteMessage}>Delete Contact</DeleteText>
+            <DeleteBtn onPress={deleteMessage}>
+                <DeleteText>Delete Contact</DeleteText>
             </DeleteBtn>
         </Container>
         </>
@@ -180,7 +192,7 @@ const ProfileImgSection = styled.View`
     align-items: center;
     justify-content: center;
 `
-const ProfileImg = styled.Image`
+const ProfileImg = styled(FastImage)`
     height: 80px;
     width: 80px;
     border-radius: 100px;
@@ -254,7 +266,7 @@ const PhoneSection = styled.View`
     margin: 0 16px;
     padding: 9px 0;
     border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
 `
 const PhoneTitle = styled.Text`
     font-weight: 400;
@@ -288,7 +300,7 @@ const SendMessageBtn = styled.TouchableOpacity`
     margin: 0 16px;
     padding: 14px 0 8px 0;
     border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
 `
 const SendMessageText = styled.Text`
     

@@ -27,7 +27,6 @@ export const groupedData = (db: RawContact[]) => {
         })
         return obj
     }, {})
-    // console.log(result["Digit"])
 
     if(result["Digit"]) sortedResult = { "Digit": result["Digit"], ...sortedResult }
     return sortedResult

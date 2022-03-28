@@ -1,11 +1,9 @@
 // @ts-ignore
-import React, { memo } from "react";
-import { Dimensions, Platform, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, {memo} from "react";
+import {Platform, View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
-import { IC_ADDBTN, IMG_NAVBG, IC_LIST, IC_HISTORY } from "../assets";
-
-const width = Dimensions.get('window').width
+import {IC_ADDBTN, IC_HISTORY, IC_LIST, IMG_NAVBG} from "../assets";
 
 const labelIcons = {
     'Contact': [IC_LIST, 'Danh Bạ'],
@@ -40,19 +38,21 @@ const Footer = ({ state, descriptors, navigation }: any) => {
             <>
             <Container>
                 <WrapBtn>
-                    <NavBg source={IMG_NAVBG} />
+                    <NavBgSection>
+                        <BgSth/>
+                        <NavBg source={IMG_NAVBG} />
+                        <BgSth/>
+                    </NavBgSection>
+
                     <AddBtn onPress={() => navigation.navigate('AddContact')}>
                         <AddImg resizeMode="contain" source={IC_ADDBTN} />
                     </AddBtn>
                 </WrapBtn>
                 {itemRender(descriptors[contactRoute.key].route.name, 0)}
-                <Sth></Sth>
+                <Sth/>
                 {itemRender(descriptors[historyRoute.key].route.name, 1)}
             </Container>
-            <View style={{
-                backgroundColor: '#F2A54A',
-                height: Platform.OS == "ios" ? insets.bottom + 10 : 10
-            }}/>
+            <FooterSection height={Platform.OS == "ios" ? insets.bottom + 10 : 10}/>
             </>
         )
     } else {
@@ -104,12 +104,20 @@ const AddImg = styled.Image`
     width: 100%;
     height: 100%;
 `
+const NavBgSection = styled.View`
+  position: absolute;
+  flex-direction: row;
+  right: 0;
+  left: 0;
+  bottom: 0;
+`
+const BgSth = styled.View`
+  flex: auto;
+  background-color: #F2A54A;
+`
 const NavBg = styled.Image`
-    width: 100%;
-    position: absolute;
-    right: 0;
-    left: 0;
-    bottom: 0;
+    width: 135px;
+    height: 56px;
 `
 const ItemImg = styled.Image<{isFocused?:boolean}>`
     width: 30px;
@@ -124,4 +132,9 @@ const ItemText = styled.Text<{isFocused?:boolean}>`
     text-align: center;
     margin-top: 4px;
     color: ${props => props.isFocused ? 'white' : '#DADADA'};
+`
+
+export const FooterSection = styled.View<{height?:string|number}>`
+  background-color: #F2A54A;
+  height: ${props => props.height}px;
 `

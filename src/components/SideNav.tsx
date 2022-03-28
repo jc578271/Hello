@@ -1,17 +1,18 @@
 // @ts-ignore
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
-import {Animated, Platform, ScrollView, StatusBar, View} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, {memo, useCallback, useEffect, useRef, useState} from "react";
+import {Alert, Animated, Platform, StatusBar, View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import {IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IC_REDDELETE, IMG_PROFILE} from "../assets";
 import {RawCollection} from "../types";
 import {useCollections} from "../store";
 // @ts-ignore
 import moment from "moment";
+import {useDispatch} from "react-redux";
+import {deleteCollectionAction, updateCollectionAction} from "../actions";
 
 
-
-const SideNav = ({ state, navigation, descriptors }:any) => {
+const SideNav = ({ navigation }:any) => {
     const [isExpanded, setIsExpand] = useState(true)
     const animation = useRef(new Animated.ValueXY({x:0, y: 0})).current
     const [listHeight, setListHeight] = useState(0)
@@ -19,14 +20,11 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
     const collectionsStore = useCollections()
     const [collections, setCollections] = useState<RawCollection[]>([])
     const [isEditing, setIsEditing] = useState(false)
+    const dispatch = useDispatch()
 
     useEffect(() => {
-        setCollections(collectionsStore)
+        setCollections( [...collectionsStore])
     }, [collectionsStore])
-
-    // useEffect(() => {
-    //     console.log(collections)
-    // }, [collections])
     
     useEffect(() => {
         let initVal = isExpanded ? listHeight : 0
@@ -52,20 +50,36 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         ])
     }, [isEditing])
 
-    const onDeletePress = useCallback((id) => {
-        console.log("delete", id)
+    const onDeletePress = useCallback((id, title) => {
+        Alert.alert(
+            `Delete ${title} collection`,
+            "Are you sure?",
+            [{
+                text: "Cancel",
+                onPress: () => console.log("cancel"),
+                style: "cancel"
+            }, {
+                text: "Delete",
+                onPress: async () => await dispatch(deleteCollectionAction(id))
+            }]
+        )
     }, [])
 
     const onInputChange = useCallback((text, id) => {
         setCollections(collectionPrev => {
-            console.log(collectionPrev)
-            let newList = collectionPrev.map(item => item.id == id ? {...item, title: text}: item)
-            return newList
+            return collectionPrev.map(item => item.id == id ? {...item, title: text} : item)
         })
     }, [collections])
 
+    const onSaveEditPress = useCallback(async () => {
+        if (isEditing) {
+            await dispatch(updateCollectionAction(collections.filter(item => item.title.trim() != "")))
+        }
+        setIsEditing(!isEditing)
+    }, [isEditing, collections])
+
     const itemRender = useCallback(({ id, title }, key) => (
-        <ItemSection key={key} onPress={() => itemOnPress({ id })}>
+        <ItemSection key={key} onPress={() => itemOnPress({ id })} onLongPress={() => setIsEditing(true)}>
             <ItemIc source={IC_ITEMCOLLECTION} />
             <ItemText>{title}</ItemText>
         </ItemSection>
@@ -75,10 +89,11 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
         <ItemInputSection key={key}>
             <ItemIc source={IC_ITEMCOLLECTION} />
             <ItemInput
+                placeholder="input collection"
                 value={title}
                 onChangeText={text => onInputChange(text, id)}
             />
-            <DeleteBtn onPress={() => onDeletePress(id)}>
+            <DeleteBtn onPress={() => onDeletePress(id, title)}>
                 <DeleteIc source={IC_REDDELETE}/>
             </DeleteBtn>
         </ItemInputSection>
@@ -86,11 +101,7 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
 
     return (
         <>
-        <View style={{
-            backgroundColor: "#F2A54A",
-            height:  Platform.OS == "ios" ? insets.top: StatusBar.currentHeight
-            }}>
-        </View>
+        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
         <Container>
             <ProfileSection>
                 <ProfileImg source={IMG_PROFILE} />
@@ -110,22 +121,23 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
                     <DropImgBtn style={{transform: [{scaleY: isExpanded?1:-1}]}} source={IC_DROP} />
                 </DropBtn>
                 <DropText>Collection</DropText>
-                <DropEditBtn><DropEditText>{isEditing?'Save':'Edit'}</DropEditText></DropEditBtn>
+                <DropEditBtn
+                    onPress={onSaveEditPress}
+                ><DropEditText>{isEditing?'Save':'Edit'}</DropEditText></DropEditBtn>
             </DropSection>
 
-            {/*<ScrollView>*/}
-                <ListSection  onLayout={e => setListHeight(e.nativeEvent.layout.height)}>
-                    <Animated.ScrollView style={[animation.getLayout()]}>
-                        {collections.map((collection, key) => (
-                            isEditing
-                                ? itemInputRender(collection, key)
-                                : itemRender(collection, key)
-                        ))}
-                    </Animated.ScrollView>
-                </ListSection>
-            {/*</ScrollView>*/}
-
-
+            <ListSection>
+                <Animated.View
+                    onLayout={e => setListHeight(e.nativeEvent.layout.height)}
+                     style={[animation.getLayout()]}
+                >
+                    {collections.map((collection, key) => (
+                        isEditing
+                            ? itemInputRender(collection, key)
+                            : itemRender(collection, key)
+                    ))}
+                </Animated.View>
+            </ListSection>
         </Container>
         </>
         
@@ -134,8 +146,14 @@ const SideNav = ({ state, navigation, descriptors }:any) => {
 
 export default memo(SideNav)
 
+const StatusBarSection = styled.View<{height?:string|number}>`
+  background-color: #F2A54A;
+  height: ${props => props.height}px;
+`
+
 const Container = styled.View`
     display: flex;
+  flex:auto;
 `
 const ProfileSection = styled.View`
     display: flex;
@@ -243,9 +261,9 @@ const DropEditText = styled.Text`
 
     color: #F2A54A;
 `
-const ListSection = styled.View`
+const ListSection = styled.ScrollView`
   overflow: hidden;
-  height: 100%;
+  flex:auto;
 `
 const ItemSection = styled.TouchableOpacity`
     display: flex;
@@ -275,10 +293,15 @@ const ItemInputSection = styled.View`
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 12px 20px;
+    padding: 8px 20px;
 `
 const ItemInput = styled.TextInput`
   flex: auto;
+  padding: 0;
+  margin: 0;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 16px;
 `
 const DeleteBtn = styled.TouchableOpacity`
 

@@ -1,24 +1,29 @@
-import React, {memo} from "react";
-import { Dimensions, View, StatusBar, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+// @ts-ignore
+import React, {memo, useCallback} from "react";
+import {Platform, StatusBar, View} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native"
-import { NavigationActions } from "react-navigation"
-import { IC_LOGO, IMG_HOMEBG, IC_SMALLLOGO } from "../assets";
+import {IC_LOGO, IC_SMALLLOGO, IMG_HOMEBG} from "../assets";
+import {useDispatch} from "react-redux";
+import {loginAction} from "../actions";
+import {StatusBarSection} from "../components/Header";
 
 interface Props {
     navigation: any
 }
-const screenHeigth = Dimensions.get("window").height
 
 const Home = ({ navigation }: Props) => {
     const insets = useSafeAreaInsets()
+    const dispatch = useDispatch()
+
+    const loginOnPress = useCallback(async () => {
+        await dispatch(loginAction({ userId: "123", username: "Nguyen Le Hoang", career: "Mobile Dev" }))
+        navigation.navigate('TabStack')
+    }, [])
+
     return (
         <>
-        <View style={{
-            backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight+16,
-        }}>
-        </View>
+        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
         <Container>
             <Section1>
                 <HomeBg resizeMode="contain" source={IMG_HOMEBG} />
@@ -35,7 +40,7 @@ const Home = ({ navigation }: Props) => {
             </Section2>
             <Section3>
                 <NonAuthText>Bạn chưa đăng nhập</NonAuthText>
-                <LoginBtn onPress={() => navigation.navigate('DrawStack')}>
+                <LoginBtn onPress={loginOnPress}>
                     <LoginText>Đăng nhập bằng base account</LoginText>
                 </LoginBtn>
                 <ManualLoginBtn>

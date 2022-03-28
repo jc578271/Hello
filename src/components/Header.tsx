@@ -13,12 +13,9 @@ const Header = ({ route, navigation }: any) => {
     }, [])
     return (
         <>
-        <View style={{
-            backgroundColor: "#FFFFFF",
-            height: Platform.OS == "ios" ? insets.top: StatusBar.currentHeight
-        }}>
+        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content"/>
-        </View>
+        </StatusBarSection>
         <Container>
             <MenuBtn
                 onPress={menuOnPress}
@@ -37,6 +34,11 @@ const Header = ({ route, navigation }: any) => {
 }
 
 export default memo(Header)
+
+export const StatusBarSection = styled.View<{height?:string|number}>`
+  background-color: #FFFFFF;
+  height: ${props => props.height}px;
+`
 
 const Container = styled.View`
     background-color: #FFFFFF;

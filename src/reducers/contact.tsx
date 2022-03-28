@@ -1,7 +1,5 @@
 import {RawContact} from "../types";
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {RootState, store} from "../store";
-import {useSelector} from "react-redux";
 
 const initContacts: RawContact[] = []
 

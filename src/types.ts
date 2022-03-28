@@ -15,3 +15,8 @@ export interface RawCollection {
     title: string,
     list: []
 }
+export interface RawAuth {
+    userId: string,
+    username: string,
+    career: string
+}

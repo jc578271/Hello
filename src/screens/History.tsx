@@ -1,6 +1,6 @@
-import React, { memo } from "react";
-import { Text } from "react-native";
-import { IC_MISS_CALL, IC_MORE_INFO } from "../assets"
+// @ts-ignore
+import React, {memo} from "react";
+import {IC_MISS_CALL, IC_MORE_INFO} from "../assets"
 import styled from "styled-components/native";
 
 const History = () => {
@@ -56,7 +56,7 @@ const HistoryItem = styled.TouchableOpacity`
     padding: 12px 16px 12px 0;
     flex-direction: row;
     border-bottom-width: 0.5px;
-    border-bottom-color: solid rgba(0, 0, 0, 0.1);;
+    border-bottom-color: rgba(0, 0, 0, 0.1);;
 `
 const Section1 = styled.View`
     flex:auto

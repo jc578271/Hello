@@ -22,7 +22,7 @@ export const IC_MISS_CALL = require('./icons/ic_miss-call.png')
 export const IC_MISS_FACETIME = require('./icons/ic_miss-facetime.png')
 
 export const IMG_HOMEBG = require('./images/img_homebg.png')
-export const IMG_NAVBG = require('./images/img_navbg.png')
+export const IMG_NAVBG = require('./images/img_nav-bg.png')
 export const IMG_DEFAULTPROFILE = require('./images/img_defaultprofile.png')
 
 export const IMG_PROFILE = require('./images/logo.jpg')

@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, {memo, useCallback, useEffect, useRef, useState} from "react";
-import {Platform, StatusBar, Text, View, BackHandler, TextInput} from "react-native";
+import {KeyboardAvoidingView, Platform, StatusBar} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
@@ -14,6 +14,7 @@ import {useContacts} from "../store";
 import {updateContactAction} from "../actions"
 import {useDispatch} from "react-redux";
 import {toastConfig} from "../components/BaseToast";
+import {StatusBarSection} from "../components/Header";
 
 const AddItemContact = ({navigation, route}) => {
     const insets = useSafeAreaInsets()
@@ -55,7 +56,7 @@ const AddItemContact = ({navigation, route}) => {
         }
     })
     const [isSubmitted, setSubmitted] = useState(false)
-    const [isValid, setIsValid] = useState({fullName: false, phone: false})
+    const [isValid, setIsValid] = useState({fullName: false, phone: false, email: false})
     const dispatch = useDispatch()
     const contacts = useContacts()
     const [isMounted, setMounted] = useState(false)
@@ -84,7 +85,11 @@ const AddItemContact = ({navigation, route}) => {
                 }))
                 return {
                     ...prev,
-                    ...itemContact
+                    ...itemContact,
+                    phones: [...phones],
+                    emails: [...emails],
+                    addresses: [...addresses],
+                    birthday: [...birthday]
                 }
             })
         }
@@ -93,9 +98,13 @@ const AddItemContact = ({navigation, route}) => {
 
     useEffect(() => {
         let isValidName = params.firstName + params.lastName != "",
-            isValidPhone = !!params.phones.filter(item => item.trim() != "").length
+            isValidPhone = !!params.phones.filter(item => item.trim() != "").length,
+            isValidEmail = params.emails.every(item => (
+                /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(item.trim())
+                || item.trim() == ""
+            ))
 
-        setIsValid({fullName: isValidName, phone: isValidPhone})
+        setIsValid({fullName: isValidName, phone: isValidPhone, email: isValidEmail})
 
     }, [JSON.stringify(params)])
 
@@ -116,12 +125,20 @@ const AddItemContact = ({navigation, route}) => {
             includeBase64: false,
             includeExtra: true,
         }, (res) => {
-            ImageResizer.createResizedImage(res.assets[0]?.uri, 200, 200, "PNG", 100)
-                .then(response => {
-                    setParams(prev => ({...prev, avatar: res.assets?.length ? response.uri : ""}));
-                })
+            if (res.assets) {
+                ImageResizer.createResizedImage(
+                    res?.assets[0]?.uri,
+                    200,
+                    200,
+                    "JPEG",
+                    100
+                )
+                    .then(response => {
+                        setParams(prev => ({...prev, avatar: res.assets?.length ? response.uri : ""}));
+                    })
+            }
         })
-    }, [])
+    }, [params.avatar])
 
 
     const infoDeleteOnPress = useCallback((key: number, typeInfo: string) => {
@@ -265,6 +282,12 @@ const AddItemContact = ({navigation, route}) => {
                 text1: "Enter phone number please",
                 type: "error"
             })
+        } else if (!isValid.email) {
+            Toast.show({
+                ...toastConfig,
+                text1: "Invalid email",
+                type: "error"
+            })
         } else {
             let submit = {
                 id: params.id,
@@ -317,12 +340,8 @@ const AddItemContact = ({navigation, route}) => {
 
 
     return (
-        <>
-            <View style={{
-                backgroundColor: "#FFFFFF",
-                height: Platform.OS == "ios" ? insets.top : StatusBar.currentHeight + 16,
-            }}>
-            </View>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+            <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
             <HeaderSection>
                 <CancelBtn onPress={() => restoreState()}>
                     <CancelText>Cancel</CancelText>
@@ -403,7 +422,7 @@ const AddItemContact = ({navigation, route}) => {
                 </AddSection>
             </Container>
             <Toast config={toastConfig}/>
-        </>
+        </KeyboardAvoidingView>
     )
 }
 
