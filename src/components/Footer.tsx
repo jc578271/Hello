@@ -7,8 +7,8 @@ import {IC_ADDBTN, IC_HISTORY, IC_LIST, IMG_NAVBG} from "../assets";
 import {getFocusedRouteNameFromRoute} from "@react-navigation/native";
 
 const labelIcons = {
-    'Contact': [IC_LIST, 'Danh Bạ'],
-    'History': [IC_HISTORY, 'Gần Đây']
+    'ContactScreen': [IC_LIST, 'Danh Bạ'],
+    'HistoryScreen': [IC_HISTORY, 'Gần Đây']
 }
 
 const Footer = ({ state, descriptors, navigation, tabRoute, mainRoute }: any) => {
@@ -18,10 +18,11 @@ const Footer = ({ state, descriptors, navigation, tabRoute, mainRoute }: any) =>
     useEffect(() => {
         const keyboardShow = Keyboard.addListener('keyboardDidShow', () => setShown(true))
         const keyboardHide = Keyboard.addListener('keyboardDidHide', () => setShown(false))
+
+        let mainRouteName = getFocusedRouteNameFromRoute(mainRoute) || "TabStack"
+        let tabRouteName = getFocusedRouteNameFromRoute(tabRoute) || "ContactScreen"
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-            let mainRouteName = getFocusedRouteNameFromRoute(mainRoute)
-            let tabRouteName = getFocusedRouteNameFromRoute(tabRoute)
-            if (Platform.OS != "ios" && mainRouteName == "TabStack" && tabRouteName == "Contact") {
+            if (Platform.OS != "ios" && mainRouteName == "TabStack" && tabRouteName == "ContactScreen") {
                 setTimeout(() => setExitApp(0), 2000)
                 if (exitApp == 0) {
                     setExitApp(prev=>prev+1)

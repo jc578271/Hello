@@ -1,19 +1,16 @@
 // @ts-ignore
 import React, {memo, useCallback} from "react";
-import {Platform, StatusBar, View} from "react-native";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native"
 import {IC_LOGO, IC_SMALLLOGO, IMG_HOMEBG} from "../assets";
 import {useDispatch} from "react-redux";
 import {loginAction} from "../actions";
-import {StatusBarSection} from "../components/Header";
+import {getStatusBarHeight} from "react-native-iphone-x-helper";
 
 interface Props {
     navigation: any
 }
 
-const Home = ({ navigation }: Props) => {
-    const insets = useSafeAreaInsets()
+const LoginScreen = ({ navigation }: Props) => {
     const dispatch = useDispatch()
 
     const loginOnPress = useCallback(async () => {
@@ -23,7 +20,6 @@ const Home = ({ navigation }: Props) => {
 
     return (
         <>
-        <StatusBarSection height={Platform.OS == "ios" ? insets.top: StatusBar.currentHeight}/>
         <Container>
             <Section1>
                 <HomeBg resizeMode="contain" source={IMG_HOMEBG} />
@@ -53,12 +49,13 @@ const Home = ({ navigation }: Props) => {
     )
 }
 
-export default memo(Home)
+export default memo(LoginScreen)
 
 const Container = styled.View`
     background-color: #FFFFFF;
     display: flex;
-    flex:auto;
+    flex: 1;
+    padding-top: ${getStatusBarHeight()}px;
 `
 
 const Section1 = styled.View`
@@ -92,7 +89,6 @@ const Title = styled.Text`
     margin-top: 20px;
     margin-bottom: 5px;
     letter-spacing: 0.12px;
-
     color: #F2A54A;
 `
 const SubTitle = styled.Text`
@@ -101,9 +97,6 @@ const SubTitle = styled.Text`
     line-height: 18px;
     text-align: center;
     letter-spacing: 0.12px;
-
-    /* Gray 1 */
-
     color: #333333;
 `
 const SmallLogoSection = styled.View`
@@ -121,16 +114,12 @@ const NonAuthText = styled.Text`
     font-weight: 400;
     font-size: 15px;
     line-height: 20px;
-    /* identical to box height, or 133% */
-
     text-align: center;
     letter-spacing: -0.24px;
-
     color: #828282;
 `
 const LoginBtn = styled.TouchableOpacity`
     height: 48px;
-
     background: #F2A54A;
     border-radius: 4px;
     justify-content: center;
@@ -140,12 +129,9 @@ const LoginText = styled.Text`
     font-weight: 500;
     font-size: 15px;
     line-height: 20px;
-    /* identical to box height, or 133% */
-
     text-align: center;
     letter-spacing: -0.24px;
     text-transform: uppercase;
-
     color: #FFFFFF;
 `
 const ManualLoginBtn = styled(LoginBtn)`

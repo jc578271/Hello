@@ -1,10 +1,10 @@
 import * as React from "react";
 import {memo, useCallback, useEffect, useState} from "react";
-import {Platform, StatusBar, View} from "react-native";
+import {Platform, StatusBar} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import {IC_BACK} from "../assets";
-import { StatusBarSection } from "./Header"
+import {StatusBarSection} from "./Header"
 import {useCollections} from "../store";
 import {RawCollection} from "../types";
 

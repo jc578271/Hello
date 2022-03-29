@@ -1,9 +1,9 @@
 // @ts-ignore
 import React, {memo} from "react";
-import {Platform, View} from "react-native"
+import {Platform} from "react-native"
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
-import { FooterSection } from "./Footer"
+import {FooterSection} from "./Footer"
 
 const CollectionFooter = () => {
     const insets = useSafeAreaInsets()

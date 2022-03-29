@@ -1,9 +1,9 @@
 // @ts-ignore
-import React, { memo, useCallback } from "react";
-import { Platform, StatusBar, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import React, {memo, useCallback} from "react";
+import {Platform, StatusBar} from "react-native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
-import { IC_MENU, IC_CAM } from "../assets";
+import {IC_CAM, IC_MENU} from "../assets";
 
 
 const Header = ({ route, navigation }: any) => {

@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, {memo, useCallback, useEffect, useRef, useState} from "react";
-import {Alert, Animated, Platform, StatusBar, View} from "react-native";
+import {Alert, Animated, Platform, StatusBar} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import styled from "styled-components/native";
 import {IC_ADDCOLLECTION, IC_DROP, IC_ITEMCOLLECTION, IC_REDDELETE, IMG_PROFILE} from "../assets";
@@ -56,7 +56,6 @@ const SideNav = ({ navigation }:any) => {
             "Are you sure?",
             [{
                 text: "Cancel",
-                onPress: () => console.log("cancel"),
                 style: "cancel"
             }, {
                 text: "Delete",

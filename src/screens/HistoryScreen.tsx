@@ -3,7 +3,7 @@ import React, {memo} from "react";
 import {IC_MISS_CALL, IC_MORE_INFO} from "../assets"
 import styled from "styled-components/native";
 
-const History = () => {
+const HistoryScreen = () => {
     return (
         <Container>
             <HistoryItem>
@@ -45,7 +45,7 @@ const History = () => {
     )
 }
 
-export default memo(History)
+export default memo(HistoryScreen)
 
 const Container = styled.ScrollView`
     background-color: #FFFFFF;

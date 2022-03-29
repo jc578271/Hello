@@ -1,10 +1,11 @@
 import { RawContact } from './../types';
+import {setQueryContactAction} from "../actions/contact";
+import {Dispatch} from "@reduxjs/toolkit";
 export const groupedData = (db: RawContact[]) => {
-    
     let result = {}
     db.forEach(item => {
-        let fullName = item.firstName + item.lastName
-        let words = fullName.split(' ')
+        let fullName = item.firstName + " " + item.lastName
+        let words = fullName.split(' ').filter(element => element)
         let firstCharOfLastname = words[words.length - 1][0] || ""
         let normalizeChar = nonAccentVietnamese(firstCharOfLastname.toLocaleLowerCase()).toUpperCase()
         if (/^[0-9]+$/.test(normalizeChar)) {
@@ -17,8 +18,8 @@ export const groupedData = (db: RawContact[]) => {
     })
     let sortedResult = Object.keys(result).sort().reduce((obj, key) => {
         obj[key] = result[key].sort((a, b) => {
-            let aFullName = a.firstName + a.lastName,
-                bFullName = b.firstName + b.lastName
+            let aFullName = a.firstName +" " + a.lastName,
+                bFullName = b.firstName +" " + b.lastName
             let aWords = aFullName.split(' '),
                 bWords = bFullName.split(' ')
             let aLastname = aWords[aWords.length - 1],
@@ -32,13 +33,26 @@ export const groupedData = (db: RawContact[]) => {
     return sortedResult
 }
 
-export const filterData = (searchInput: string, db: RawContact[]) => {
+export const filterData = (searchInput: string, contacts: { byKey: any, query:any }, dispatch: Dispatch<any>) => {
     searchInput = nonAccentVietnamese(searchInput).trim().toLowerCase()
-    return db.filter(({firstName, lastName, phones}) => {
-        let fullName = firstName + lastName
-        return phones.some(item => item.trim().toLowerCase().includes(searchInput))
-        || nonAccentVietnamese(fullName).trim().toLowerCase().includes(searchInput)
-    })
+    let db: RawContact[] = contacts.query["all"].map(id => contacts.byKey[id])
+    if (searchInput) {
+        if (!contacts.query[searchInput]) {
+            db = contacts.query["all"].filter(id => {
+                let { firstName, lastName, phones } = contacts.byKey[id]
+                let fullName = firstName + " " + lastName
+                return phones.some(item => item.trim().toLowerCase().includes(searchInput))
+                    || nonAccentVietnamese(fullName).trim().toLowerCase().includes(searchInput)
+            }).map(id => contacts.byKey[id])
+            dispatch(setQueryContactAction(searchInput, db.map(item => item.id)))
+        } else {
+            db = contacts.query[searchInput].map(id => contacts.byKey[id])
+
+        }
+    }
+
+
+    return db
 }
 
 function nonAccentVietnamese(str) {

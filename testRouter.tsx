@@ -1,18 +1,18 @@
 import React, { memo } from "react";
-import Home from "./src/screens/Home";
-import Contact from "./src/screens/Contact";
+import LoginScreen from "./src/screens/LoginScreen";
+import ContactScreen from "./src/screens/ContactScreen";
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createDrawerNavigator } from '@react-navigation/drawer'
-import History from "./src/screens/History";
+import HistoryScreen from "./src/screens/HistoryScreen";
 import Footer from "./src/components/Footer";
 import Header from "./src/components/Header"
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SideNav from "./src/components/SideNav";
 import Collections from "./src/screens/Collections";
 import AddEditContact from "./src/screens/AddEditContact";
-import ItemContact from "./src/screens/ItemContact";
+import DetailContact from "./src/screens/DetailContact";
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const Drawer = createDrawerNavigator()
@@ -20,12 +20,12 @@ const Drawer = createDrawerNavigator()
 const TabStack = ({ route, navigation }: any) => {
     return (
         <Tab.Navigator
-            initialRouteName="Contact"
+            initialRouteName="ContactScreen"
             screenOptions={{ header: props => <Header navigation={navigation} {...props} /> }}
             tabBar={props => <Footer {...props} />}
         >
-            <Tab.Screen name="Contact" component={Contact} />
-            <Tab.Screen name="History" component={History} />
+            <Tab.Screen name="ContactScreen" component={ContactScreen} />
+            <Tab.Screen name="HistoryScreen" component={HistoryScreen} />
         </Tab.Navigator>
     )
 }
@@ -46,7 +46,7 @@ const OtherStack = () => {
             screenOptions={{ headerShown: false }}>
             <Stack.Screen name="ContactStack" component={ContactStack} />
             <Stack.Screen name="Collections" component={Collections} />
-            <Stack.Screen name="ItemContact" component={ItemContact} />
+            <Stack.Screen name="DetailContact" component={DetailContact} />
             <Stack.Screen name="EditContact" component={AddEditContact} />
         </Stack.Navigator>
     )
@@ -57,11 +57,11 @@ const Router = () => {
         <SafeAreaProvider>
             <NavigationContainer>
                 <Drawer.Navigator
-                    initialRouteName="Home"
+                    initialRouteName="LoginScreen"
                     screenOptions={{ headerShown: false }}
                     drawerContent={props => <SideNav {...props} />}
                 >
-                    <Drawer.Screen options={{ swipeEnabled: false }} name="Home" component={Home} />
+                    <Drawer.Screen options={{ swipeEnabled: false }} name="LoginScreen" component={LoginScreen} />
                     <Drawer.Screen name="DrawStack" component={OtherStack} />
                 </Drawer.Navigator>
             </NavigationContainer>
